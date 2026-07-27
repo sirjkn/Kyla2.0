@@ -121,10 +121,28 @@ export function saveCustomers(customers: Customer[]): void {
 }
 
 
+export function capitalizeWords(str: string): string {
+  if (!str) return str;
+  return str
+    .trim()
+    .split(/\s+/)
+    .map(word => {
+      if (!word) return '';
+      if (word.toLowerCase() === 'n') return 'N';
+      if (word === '&' || word === '+') return word;
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
+}
+
 export function loadCategories(): Category[] {
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-    return saved ? JSON.parse(saved) : INITIAL_CATEGORIES;
+    const cats: Category[] = saved ? JSON.parse(saved) : INITIAL_CATEGORIES;
+    return cats.map(c => ({
+      ...c,
+      name: capitalizeWords(c.name)
+    }));
   } catch (e) {
     console.error('Failed to load categories from localStorage', e);
     return INITIAL_CATEGORIES;
@@ -133,7 +151,11 @@ export function loadCategories(): Category[] {
 
 export function saveCategories(categories: Category[]): void {
   try {
-    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+    const formatted = categories.map(c => ({
+      ...c,
+      name: capitalizeWords(c.name)
+    }));
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(formatted));
   } catch (e) {
     console.error('Failed to save categories', e);
   }
@@ -142,16 +164,27 @@ export function saveCategories(categories: Category[]): void {
 export function loadServices(): Service[] {
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.SERVICES);
-    return saved ? JSON.parse(saved) : INITIAL_SERVICES;
+    const rawServices: Service[] = saved ? JSON.parse(saved) : INITIAL_SERVICES;
+    return rawServices.map(srv => ({
+      ...srv,
+      name: capitalizeWords(srv.name)
+    }));
   } catch (e) {
     console.error('Failed to load services from localStorage', e);
-    return INITIAL_SERVICES;
+    return INITIAL_SERVICES.map(srv => ({
+      ...srv,
+      name: capitalizeWords(srv.name)
+    }));
   }
 }
 
 export function saveServices(services: Service[]): void {
   try {
-    localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(services));
+    const formatted = services.map(srv => ({
+      ...srv,
+      name: capitalizeWords(srv.name)
+    }));
+    localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(formatted));
   } catch (e) {
     console.error('Failed to save services', e);
   }
@@ -160,7 +193,16 @@ export function saveServices(services: Service[]): void {
 export function loadStaff(): Staff[] {
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.STAFF);
-    return saved ? JSON.parse(saved) : INITIAL_STAFF;
+    if (!saved) return INITIAL_STAFF;
+    const loaded: Staff[] = JSON.parse(saved);
+    const existingIds = new Set(loaded.map(s => s.id));
+    const missing = INITIAL_STAFF.filter(s => !existingIds.has(s.id));
+    if (missing.length > 0) {
+      const merged = [...loaded, ...missing];
+      localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(merged));
+      return merged;
+    }
+    return loaded;
   } catch (e) {
     console.error('Failed to load staff from localStorage', e);
     return INITIAL_STAFF;

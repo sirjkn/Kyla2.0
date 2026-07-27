@@ -24,7 +24,8 @@ import {
   loadPaymentMethods, savePaymentMethods,
   loadCustomers, saveCustomers,
   loadTheme, saveTheme,
-  exportBackupJSON, importBackupJSON, importLegacyJSON, resetToFactoryDefaults
+  exportBackupJSON, importBackupJSON, importLegacyJSON, resetToFactoryDefaults,
+  capitalizeWords
 } from './lib/storage';
 
 import { Header } from './components/Header';
@@ -247,6 +248,7 @@ export default function App() {
   const handleAddService = (newServiceData: Omit<Service, 'id' | 'createdAt'>) => {
     const newService: Service = {
       ...newServiceData,
+      name: capitalizeWords(newServiceData.name),
       id: 'srv-' + Date.now(),
       createdAt: new Date().toISOString(),
     };
@@ -259,11 +261,15 @@ export default function App() {
   };
 
   const handleEditService = (updatedService: Service) => {
-    const updated = services.map((s) => (s.id === updatedService.id ? updatedService : s));
+    const formatted = {
+      ...updatedService,
+      name: capitalizeWords(updatedService.name)
+    };
+    const updated = services.map((s) => (s.id === formatted.id ? formatted : s));
     setServices(updated);
     saveServices(updated);
 
-    const log = createActivityLog('Service Updated', `Updated service "${updatedService.name}"`, 'service');
+    const log = createActivityLog('Service Updated', `Updated service "${formatted.name}"`, 'service');
     setActivityLogs((prev) => [log, ...prev]);
   };
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Category, Service, CompanyDetails } from '../types';
+import { capitalizeWords } from '../lib/storage';
 import { 
   Sparkles, 
   Layers, 
@@ -143,13 +144,18 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
     e.preventDefault();
     if (!serviceFormData.name.trim() || !serviceFormData.categoryId) return;
 
+    const formattedData = {
+      ...serviceFormData,
+      name: capitalizeWords(serviceFormData.name.trim())
+    };
+
     if (editingService) {
       onEditService({
         ...editingService,
-        ...serviceFormData,
+        ...formattedData,
       });
     } else {
-      onAddService(serviceFormData);
+      onAddService(formattedData);
     }
     setIsServiceModalOpen(false);
   };
