@@ -170,7 +170,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             </div>
 
             <div 
-              className="max-h-36 sm:max-h-40 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-1.5 space-y-1 shadow-inner"
+              className="max-h-64 sm:max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-1.5 space-y-1 shadow-inner"
               id="login-username-scroll-list"
             >
               {filteredUsers.length > 0 ? (
@@ -184,14 +184,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                         setSelectedUserId(u.id);
                         setErrorMsg('');
                       }}
-                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-all ${
+                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all ${
                         isSelected
                           ? 'bg-blue-600 text-white shadow-xs'
                           : 'text-slate-700 hover:bg-slate-200/80 hover:text-slate-900 bg-white border border-slate-100'
                       }`}
                     >
-                      <span className="truncate">{u.name}</span>
-                      {isSelected && <Check className="w-3.5 h-3.5 text-white shrink-0 ml-1" />}
+                      <div className="flex flex-col min-w-0 pr-2">
+                        <span className="truncate font-bold text-xs">{u.name}</span>
+                        <span className={`text-[10px] truncate ${isSelected ? 'text-blue-100' : 'text-slate-400'}`}>
+                          {u.role}
+                        </span>
+                      </div>
+                      {isSelected && <Check className="w-4 h-4 text-white shrink-0 ml-1" />}
                     </button>
                   );
                 })
