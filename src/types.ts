@@ -133,5 +133,6 @@ export type SettingsSubTab =
   | 'receipt' 
   | 'payment' 
   | 'backup'
-  | 'import';
+  | 'import'
+  | 'password';
 

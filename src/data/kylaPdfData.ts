@@ -28,7 +28,7 @@ export const KYLA_CATEGORIES: Category[] = [
   {
     id: 'cat-massage',
     name: 'Massage & Spa Therapy',
-    description: 'Swedish massage, Deep Tissue, Back massage, Head, Shoulder & Foot therapy',
+    description: 'Swedish Massage, Deep Tissue, Back massage, Head, Shoulder & Foot therapy',
     color: '#2563eb',
     iconName: 'Sparkles',
     createdAt: '2026-02-01T00:00:00.000Z',

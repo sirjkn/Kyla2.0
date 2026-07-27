@@ -9,6 +9,7 @@ import {
   PaymentMethodConfig
 } from '../types';
 import { PaymentSettings } from './PaymentSettings';
+import { getUserPassword, setUserPassword } from './LoginPage';
 import { 
   Building2, 
   Users, 
@@ -35,7 +36,9 @@ import {
   ShieldAlert,
   Sparkles,
   FileText,
-  Smartphone
+  Smartphone,
+  KeyRound,
+  Lock
 } from 'lucide-react';
 
 interface SettingsManagerProps {
@@ -45,6 +48,7 @@ interface SettingsManagerProps {
   categories: Category[];
   services: Service[];
   paymentMethods: PaymentMethodConfig[];
+  currentUser?: { id: string; name: string; role: string } | null;
   activeSubTab: SettingsSubTab;
   onSelectSubTab: (subTab: SettingsSubTab) => void;
   onSaveCompany: (updated: CompanyDetails) => void;
@@ -66,6 +70,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   categories,
   services,
   paymentMethods,
+  currentUser,
   activeSubTab,
   onSelectSubTab,
   onSaveCompany,
@@ -79,6 +84,26 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   onImportLegacyBackup,
   onResetDefaults,
 }) => {
+  const isAdmin = 
+    currentUser?.role?.toLowerCase().includes('admin') || 
+    currentUser?.role?.toLowerCase().includes('owner') || 
+    currentUser?.id === 'admin-owner';
+
+  // Admin Reset Password Modal State
+  const [adminResetTarget, setAdminResetTarget] = useState<{ id: string; name: string; role: string } | null>(null);
+  const [adminResetNewPass, setAdminResetNewPass] = useState('');
+  const [adminResetMsg, setAdminResetMsg] = useState('');
+  const [adminResetErr, setAdminResetErr] = useState('');
+
+  // Self Password Change State
+  const [selfCurrentPass, setSelfCurrentPass] = useState('');
+  const [selfNewPass, setSelfNewPass] = useState('');
+  const [selfConfirmPass, setSelfConfirmPass] = useState('');
+  const [selfSuccessMsg, setSelfSuccessMsg] = useState('');
+  const [selfErrMsg, setSelfErrMsg] = useState('');
+
+  // Selected staff user for Admin Password Manager tab
+  const [adminSelectedUserId, setAdminSelectedUserId] = useState<string>('');
 
   // Company Details Form State
   const [companyForm, setCompanyForm] = useState<CompanyDetails>({ ...company });
@@ -388,70 +413,96 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
 
         {/* Sub-tab Pills */}
         <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl w-full md:w-auto">
-          <button
-            onClick={() => onSelectSubTab('company')}
-            className={`flex-1 md:flex-initial px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-              activeSubTab === 'company'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-            id="subtab-company"
-          >
-            <Building2 className="w-3.5 h-3.5 text-indigo-500" />
-            <span>Company Details</span>
-          </button>
+          {isAdmin ? (
+            <>
+              <button
+                onClick={() => onSelectSubTab('company')}
+                className={`flex-1 md:flex-initial px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  activeSubTab === 'company'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                id="subtab-company"
+              >
+                <Building2 className="w-3.5 h-3.5 text-indigo-500" />
+                <span>Company Details</span>
+              </button>
 
-          <button
-            onClick={() => onSelectSubTab('staff')}
-            className={`flex-1 md:flex-initial px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-              activeSubTab === 'staff'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-            id="subtab-staff"
-          >
-            <Users className="w-3.5 h-3.5 text-blue-500" />
-            <span>Staff ({staff.length})</span>
-          </button>
+              <button
+                onClick={() => onSelectSubTab('staff')}
+                className={`flex-1 md:flex-initial px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  activeSubTab === 'staff'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                id="subtab-staff"
+              >
+                <Users className="w-3.5 h-3.5 text-blue-500" />
+                <span>Staff ({staff.length})</span>
+              </button>
 
-          <button
-            onClick={() => onSelectSubTab('receipt')}
-            className={`flex-1 md:flex-initial px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-              activeSubTab === 'receipt'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-            id="subtab-receipt"
-          >
-            <Printer className="w-3.5 h-3.5 text-blue-500" />
-            <span>Receipt Templates</span>
-          </button>
+              <button
+                onClick={() => onSelectSubTab('receipt')}
+                className={`flex-1 md:flex-initial px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  activeSubTab === 'receipt'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                id="subtab-receipt"
+              >
+                <Printer className="w-3.5 h-3.5 text-blue-500" />
+                <span>Receipt Templates</span>
+              </button>
 
-          <button
-            onClick={() => onSelectSubTab('payment')}
-            className={`flex-1 md:flex-initial px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-              activeSubTab === 'payment'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-            id="subtab-payment"
-          >
-            <Smartphone className="w-3.5 h-3.5 text-blue-500" />
-            <span>Payment Methods</span>
-          </button>
+              <button
+                onClick={() => onSelectSubTab('payment')}
+                className={`flex-1 md:flex-initial px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  activeSubTab === 'payment'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                id="subtab-payment"
+              >
+                <Smartphone className="w-3.5 h-3.5 text-blue-500" />
+                <span>Payment Methods</span>
+              </button>
 
-          <button
-            onClick={() => onSelectSubTab('backup')}
-            className={`flex-1 md:flex-initial px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-              activeSubTab === 'backup'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-            id="subtab-backup"
-          >
-            <Database className="w-3.5 h-3.5 text-amber-500" />
-            <span>Backup / Restore</span>
-          </button>
+              <button
+                onClick={() => onSelectSubTab('backup')}
+                className={`flex-1 md:flex-initial px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  activeSubTab === 'backup'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                id="subtab-backup"
+              >
+                <Database className="w-3.5 h-3.5 text-amber-500" />
+                <span>Backup / Restore</span>
+              </button>
+
+              <button
+                onClick={() => onSelectSubTab('password')}
+                className={`flex-1 md:flex-initial px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  activeSubTab === 'password'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                id="subtab-password"
+              >
+                <KeyRound className="w-3.5 h-3.5 text-amber-500" />
+                <span>User Passwords</span>
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => onSelectSubTab('password')}
+              className="flex-1 md:flex-initial px-4 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs flex items-center justify-center gap-1.5"
+              id="subtab-password"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-amber-500" />
+              <span>Account & Password</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -693,60 +744,59 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
             {staff.map((member) => (
               <div
                 key={member.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col justify-between"
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 rounded-full ${member.avatarColor || 'bg-blue-500'} text-white font-black text-sm flex items-center justify-center shadow-xs`}>
+                  <div className="flex items-center justify-between gap-1.5 mb-2">
+                    <div className="flex items-center space-x-2 min-w-0">
+                      <div className={`w-7 h-7 rounded-lg ${member.avatarColor || 'bg-blue-600'} text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs`}>
                         {member.name.split(' ').map(n=>n[0]).join('')}
                       </div>
-                      <div>
-                        <h4 className="font-extrabold text-base text-slate-900 dark:text-slate-100">
+                      <div className="min-w-0">
+                        <h4 className="font-extrabold text-xs text-slate-900 dark:text-slate-100 truncate leading-tight">
                           {member.name}
                         </h4>
-                        <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 block">
+                        <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 block truncate">
                           {member.role}
                         </span>
                       </div>
                     </div>
 
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0 ${
                       member.status === 'active' 
-                        ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' 
+                        ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/50' 
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
                     }`}>
                       {member.status === 'active' ? 'Active' : 'Inactive'}
                     </span>
                   </div>
 
-                  <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300 pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <p className="flex items-center gap-1.5">
-                      <Phone className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{member.phone || 'No phone'}</span>
+                  <div className="space-y-0.5 text-[10px] text-slate-500 dark:text-slate-400 pt-1.5 border-t border-slate-100 dark:border-slate-800 font-medium">
+                    <p className="flex items-center gap-1 truncate">
+                      <Phone className="w-3 h-3 text-slate-400 shrink-0" />
+                      <span className="truncate">{member.phone || 'No phone'}</span>
                     </p>
-                    <p className="flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{member.email || 'No email'}</span>
-                    </p>
+                    {member.email && (
+                      <p className="flex items-center gap-1 truncate">
+                        <Mail className="w-3 h-3 text-slate-400 shrink-0" />
+                        <span className="truncate">{member.email}</span>
+                      </p>
+                    )}
                   </div>
 
                   {/* Specializations list */}
-                  <div className="mt-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                      Specializations
-                    </span>
+                  <div className="mt-1.5">
                     <div className="flex flex-wrap gap-1">
                       {member.specializations.map((specId) => {
                         const cat = categories.find((c) => c.id === specId);
                         return (
                           <span
                             key={specId}
-                            className="text-[10px] font-bold px-2 py-0.5 rounded-md text-white"
+                            className="text-[9px] font-bold px-1.5 py-0.25 rounded text-white"
                             style={{ backgroundColor: cat?.color || '#3b82f6' }}
                           >
                             {cat?.name || specId}
@@ -754,27 +804,44 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                         );
                       })}
                       {member.specializations.length === 0 && (
-                        <span className="text-[11px] text-slate-400 italic">All Treatments</span>
+                        <span className="text-[9px] text-slate-400 italic">All Treatments</span>
                       )}
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end space-x-1">
+                <div className="pt-2 mt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                   <button
-                    onClick={() => handleOpenStaffModal(member)}
-                    className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/60 transition-colors"
-                    title="Edit Staff Member"
+                    onClick={() => {
+                      setAdminResetTarget({ id: member.id, name: member.name, role: member.role || 'Staff' });
+                      setAdminResetNewPass('');
+                      setAdminResetMsg('');
+                      setAdminResetErr('');
+                    }}
+                    className="px-2 py-1 rounded-lg text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-950/80 transition-colors flex items-center gap-1 text-[10px] font-extrabold bg-amber-500/10 border border-amber-300/50 dark:border-amber-700/50"
+                    title="Change Staff Password"
+                    id={`change-staff-pass-${member.id}`}
                   >
-                    <Edit3 className="w-4 h-4" />
+                    <KeyRound className="w-3 h-3 text-amber-500" />
+                    <span>Password</span>
                   </button>
-                  <button
-                    onClick={() => setDeletingStaffId(member.id)}
-                    className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/60 transition-colors"
-                    title="Delete Staff Member"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+
+                  <div className="flex items-center space-x-1">
+                    <button
+                      onClick={() => handleOpenStaffModal(member)}
+                      className="p-1 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/60 transition-colors"
+                      title="Edit Staff Member"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setDeletingStaffId(member.id)}
+                      className="p-1 rounded-lg text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/60 transition-colors"
+                      title="Delete Staff Member"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
 
               </div>
@@ -1261,6 +1328,198 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
       )}
 
       {/* ========================================================= */}
+      {/* 6. PASSWORD & ACCOUNT SUBTAB (Or Restricted Non-Admin View) */}
+      {/* ========================================================= */}
+      {(!isAdmin || activeSubTab === 'password') && (
+        <div className="space-y-6 animate-fadeIn">
+          {!isAdmin && (
+            <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 flex items-start gap-3 text-amber-900 dark:text-amber-200">
+              <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="text-xs space-y-1">
+                <p className="font-bold text-sm">Restricted Access to System Settings</p>
+                <p className="text-amber-700 dark:text-amber-300">
+                  Full system operations (Company profile, Therapist roster, Thermal receipt layouts, Payment channels, and Backups) are restricted to Administrators. As a staff member, you can change your account password below.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* User Self Change Password Form */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm max-w-xl">
+            <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-4 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold">
+                <KeyRound className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100">
+                  Change Account Password
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Account: <strong className="text-slate-800 dark:text-slate-200">{currentUser?.name || 'User'}</strong> ({currentUser?.role || 'Staff'})
+                </p>
+              </div>
+            </div>
+
+            {selfSuccessMsg && (
+              <div className="p-3 mb-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs font-bold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>{selfSuccessMsg}</span>
+              </div>
+            )}
+
+            {selfErrMsg && (
+              <div className="p-3 mb-4 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs font-bold flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-600" />
+                <span>{selfErrMsg}</span>
+              </div>
+            )}
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setSelfErrMsg('');
+                setSelfSuccessMsg('');
+
+                if (!currentUser?.id) {
+                  setSelfErrMsg('User identity not found.');
+                  return;
+                }
+
+                const actualPass = getUserPassword(currentUser.id);
+                if (selfCurrentPass !== actualPass) {
+                  setSelfErrMsg('Current password is incorrect.');
+                  return;
+                }
+
+                if (!selfNewPass || selfNewPass.trim().length < 3) {
+                  setSelfErrMsg('New password must be at least 3 characters long.');
+                  return;
+                }
+
+                if (selfNewPass !== selfConfirmPass) {
+                  setSelfErrMsg('New password and confirmation do not match.');
+                  return;
+                }
+
+                setUserPassword(currentUser.id, selfNewPass.trim());
+                setSelfSuccessMsg('Password updated successfully!');
+                setSelfCurrentPass('');
+                setSelfNewPass('');
+                setSelfConfirmPass('');
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Current Password
+                </label>
+                <input
+                  type="password"
+                  placeholder="Enter current password..."
+                  value={selfCurrentPass}
+                  onChange={(e) => setSelfCurrentPass(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-600"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  placeholder="Enter new password (min 3 chars)..."
+                  value={selfNewPass}
+                  onChange={(e) => setSelfNewPass(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-600"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  placeholder="Re-enter new password..."
+                  value={selfConfirmPass}
+                  onChange={(e) => setSelfConfirmPass(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-600"
+                  required
+                />
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Update My Password</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Admin Section: Reset Passwords for Any Staff Member */}
+          {isAdmin && (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm max-w-xl">
+              <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-4 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100">
+                    Administrator User Password Manager
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Select any staff user from your system roster to reset or override their password directly.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Select Staff User
+                  </label>
+                  <select
+                    value={adminSelectedUserId}
+                    onChange={(e) => {
+                      const uid = e.target.value;
+                      setAdminSelectedUserId(uid);
+                      const target = staff.find((s) => s.id === uid) || (uid === 'admin-owner' ? { id: 'admin-owner', name: 'Main Admin / Owner', role: 'Administrator' } : null);
+                      if (target) {
+                        setAdminResetTarget(target);
+                        setAdminResetNewPass('');
+                        setAdminResetMsg('');
+                        setAdminResetErr('');
+                      }
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-bold border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="">-- Choose User to Reset Password --</option>
+                    <option value="admin-owner">Main Admin / Owner (Administrator)</option>
+                    {staff.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} ({s.role || 'Staff'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <p className="text-xs text-slate-500 dark:text-slate-400 italic">
+                  💡 Tip: You can also click the <strong className="text-amber-600">Password</strong> button directly on any staff card in the Staff Roster tab to reset their password!
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================= */}
       {/* STAFF MODAL (ADD / EDIT) */}
       {/* ========================================================= */}
       {isStaffModalOpen && (
@@ -1466,6 +1725,108 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                 Yes, Reset System
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ADMIN RESET USER PASSWORD MODAL */}
+      {adminResetTarget && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 relative">
+            <button
+              onClick={() => setAdminResetTarget(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold">
+                <KeyRound className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
+                  Admin Password Override
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Account: <strong className="text-slate-900 dark:text-slate-100">{adminResetTarget.name}</strong> ({adminResetTarget.role})
+                </p>
+              </div>
+            </div>
+
+            {adminResetMsg && (
+              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs font-bold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>{adminResetMsg}</span>
+              </div>
+            )}
+
+            {adminResetErr && (
+              <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs font-bold flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-600" />
+                <span>{adminResetErr}</span>
+              </div>
+            )}
+
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                setAdminResetErr('');
+                setAdminResetMsg('');
+                if (!adminResetNewPass || adminResetNewPass.trim().length < 3) {
+                  setAdminResetErr('Password must be at least 3 characters long.');
+                  return;
+                }
+                setUserPassword(adminResetTarget.id, adminResetNewPass.trim());
+                setAdminResetMsg(`Password for ${adminResetTarget.name} updated successfully!`);
+                setTimeout(() => {
+                  setAdminResetTarget(null);
+                }, 1200);
+              }} 
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  New Password for {adminResetTarget.name}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter new password..."
+                    value={adminResetNewPass}
+                    onChange={(e) => setAdminResetNewPass(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-amber-500"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setAdminResetNewPass('12345')}
+                    className="px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 text-xs font-bold whitespace-nowrap"
+                  >
+                    Set '12345'
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  As Administrator, you can set a new password without needing their current password.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setAdminResetTarget(null)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md"
+                >
+                  Save New Password
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

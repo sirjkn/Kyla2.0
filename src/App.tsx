@@ -588,6 +588,7 @@ export default function App() {
               categories={categories}
               services={services}
               paymentMethods={paymentMethods}
+              currentUser={currentUser}
               activeSubTab={settingsSubTab}
               onSelectSubTab={setSettingsSubTab}
               onSaveCompany={handleSaveCompany}
