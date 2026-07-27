@@ -114,33 +114,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* Key Metric Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Key Metric Cards Grid (2 Columns on Mobile, Colorful & Compact) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         
         {/* Total Services Card */}
         <div 
           onClick={() => onNavigateToTab('services')}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+          className="bg-gradient-to-br from-blue-50/80 via-white to-indigo-50/50 dark:from-blue-950/20 dark:via-slate-900 dark:to-indigo-950/20 border border-blue-100 dark:border-blue-900/40 rounded-2xl p-3 sm:p-5 shadow-xs hover:shadow-md transition-all cursor-pointer group relative overflow-hidden"
           id="metric-card-services"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[10px] sm:text-xs font-bold text-blue-900 dark:text-blue-300 uppercase tracking-wider truncate">
               Spa Treatments
             </span>
-            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Sparkles className="w-5 h-5" />
+            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs shadow-blue-500/30 shrink-0">
+              <Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
+          <div className="mt-2 sm:mt-3 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
             <div>
-              <span className="text-3xl font-black text-slate-900 dark:text-slate-100 font-mono">
+              <span className="text-xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 font-mono leading-none">
                 {services.length}
               </span>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {activeServices.length} Active in catalog
+              <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">
+                {activeServices.length} Active
               </p>
             </div>
-            <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-1 rounded-md flex items-center gap-1">
+            <span className="self-start sm:self-auto text-[10px] sm:text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-500/10 dark:bg-blue-500/20 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg border border-blue-200/50 dark:border-blue-700/50 flex items-center gap-0.5">
               Active <ArrowUpRight className="w-3 h-3" />
             </span>
           </div>
@@ -149,28 +149,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Categories Count Card */}
         <div 
           onClick={() => onNavigateToTab('services')}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+          className="bg-gradient-to-br from-purple-50/80 via-white to-fuchsia-50/50 dark:from-purple-950/20 dark:via-slate-900 dark:to-fuchsia-950/20 border border-purple-100 dark:border-purple-900/40 rounded-2xl p-3 sm:p-5 shadow-xs hover:shadow-md transition-all cursor-pointer group relative overflow-hidden"
           id="metric-card-categories"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Service Categories
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[10px] sm:text-xs font-bold text-purple-900 dark:text-purple-300 uppercase tracking-wider truncate">
+              Categories
             </span>
-            <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Layers className="w-5 h-5" />
+            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs shadow-purple-500/30 shrink-0">
+              <Layers className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
+          <div className="mt-2 sm:mt-3 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
             <div>
-              <span className="text-3xl font-black text-slate-900 dark:text-slate-100 font-mono">
+              <span className="text-xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 font-mono leading-none">
                 {categories.length}
               </span>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Groupings configured
+              <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">
+                Groupings
               </p>
             </div>
-            <span className="text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 px-2 py-1 rounded-md flex items-center gap-1">
-              Organized <ChevronRight className="w-3 h-3" />
+            <span className="self-start sm:self-auto text-[10px] sm:text-xs font-bold text-purple-700 dark:text-purple-300 bg-purple-500/10 dark:bg-purple-500/20 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg border border-purple-200/50 dark:border-purple-700/50 flex items-center gap-0.5">
+              Catalog <ChevronRight className="w-3 h-3" />
             </span>
           </div>
         </div>
@@ -181,52 +181,52 @@ export const Dashboard: React.FC<DashboardProps> = ({
             onNavigateToTab('settings');
             onNavigateToSettingsSubTab('staff');
           }}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+          className="bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/50 dark:from-emerald-950/20 dark:via-slate-900 dark:to-teal-950/20 border border-emerald-100 dark:border-emerald-900/40 rounded-2xl p-3 sm:p-5 shadow-xs hover:shadow-md transition-all cursor-pointer group relative overflow-hidden"
           id="metric-card-staff"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[10px] sm:text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase tracking-wider truncate">
               Therapists & Staff
             </span>
-            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Users className="w-5 h-5" />
+            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs shadow-emerald-500/30 shrink-0">
+              <Users className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
+          <div className="mt-2 sm:mt-3 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
             <div>
-              <span className="text-3xl font-black text-slate-900 dark:text-slate-100 font-mono">
+              <span className="text-xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 font-mono leading-none">
                 {staff.length}
               </span>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {activeStaff.length} On duty / Active
+              <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">
+                {activeStaff.length} On Duty
               </p>
             </div>
-            <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-1 rounded-md flex items-center gap-1">
+            <span className="self-start sm:self-auto text-[10px] sm:text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 dark:bg-emerald-500/20 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg border border-emerald-200/50 dark:border-emerald-700/50 flex items-center gap-0.5">
               Roster <ChevronRight className="w-3 h-3" />
             </span>
           </div>
         </div>
 
         {/* Average Service Price Card */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Avg Treatment Price
+        <div className="bg-gradient-to-br from-amber-50/80 via-white to-orange-50/50 dark:from-amber-950/20 dark:via-slate-900 dark:to-orange-950/20 border border-amber-100 dark:border-amber-900/40 rounded-2xl p-3 sm:p-5 shadow-xs hover:shadow-md transition-all relative overflow-hidden">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[10px] sm:text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider truncate">
+              Avg Price
             </span>
-            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-              <DollarSign className="w-5 h-5" />
+            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-xs shadow-amber-500/30 shrink-0">
+              <DollarSign className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
+          <div className="mt-2 sm:mt-3 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
             <div>
-              <span className="text-2xl font-black text-slate-900 dark:text-slate-100 font-mono">
+              <span className="text-base sm:text-2xl font-black text-slate-900 dark:text-slate-100 font-mono leading-none truncate block">
                 {company.currency || 'KES'} {avgPrice.toLocaleString()}
               </span>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Avg Duration: {avgDuration} mins
+              <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">
+                Avg {avgDuration} mins
               </p>
             </div>
-            <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-1 rounded-md">
+            <span className="self-start sm:self-auto text-[10px] sm:text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-500/10 dark:bg-amber-500/20 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg border border-amber-200/50 dark:border-amber-700/50">
               Rate
             </span>
           </div>

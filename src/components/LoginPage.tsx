@@ -4,12 +4,11 @@ import {
   Sparkles, 
   Lock, 
   User, 
-  KeyRound, 
   Eye, 
   EyeOff, 
   LogIn, 
   ShieldCheck,
-  CheckCircle2
+  Check
 } from 'lucide-react';
 
 interface LoginPageProps {
@@ -89,24 +88,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 selection:bg-blue-500 selection:text-white relative overflow-hidden">
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 selection:bg-blue-500 selection:text-white relative overflow-y-auto">
       
       {/* Background Decorative Soft Orbs */}
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl relative z-10 space-y-6">
+      <div className="max-w-md w-full my-auto bg-white border border-slate-200 rounded-3xl p-5 sm:p-7 shadow-xl relative z-10 space-y-5 max-h-[92vh] overflow-y-auto">
         
         {/* Brand Header */}
-        <div className="text-center space-y-2">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white mx-auto shadow-md shadow-blue-600/20">
-            <Sparkles className="w-7 h-7 text-white" />
+        <div className="text-center space-y-1.5">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white mx-auto shadow-md shadow-blue-600/20">
+            <Sparkles className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
               {company.businessName || 'Kyla Barber Shop'}
             </h1>
-            <p className="text-xs text-slate-500 mt-1 font-medium">
+            <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
               Point of Sale & Management Portal
             </p>
           </div>
@@ -115,27 +114,44 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           
-          {/* Select Username / Staff */}
+          {/* Scrollable Compact User Selection List */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-blue-600" />
-              <span>Select Account Username</span>
-            </label>
-            <select
-              value={selectedUserId}
-              onChange={(e) => {
-                setSelectedUserId(e.target.value);
-                setErrorMsg('');
-              }}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
-              id="login-username-select"
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-blue-600" />
+                <span>Select Account</span>
+              </label>
+              <span className="text-[10px] text-slate-400 font-medium">
+                Scroll to view all
+              </span>
+            </div>
+
+            <div 
+              className="max-h-36 sm:max-h-40 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-1.5 space-y-1 shadow-inner"
+              id="login-username-scroll-list"
             >
-              {allUsers.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name}
-                </option>
-              ))}
-            </select>
+              {allUsers.map((u) => {
+                const isSelected = u.id === selectedUserId;
+                return (
+                  <button
+                    key={u.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedUserId(u.id);
+                      setErrorMsg('');
+                    }}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-all ${
+                      isSelected
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'text-slate-700 hover:bg-slate-200/80 hover:text-slate-900 bg-white border border-slate-100'
+                    }`}
+                  >
+                    <span className="truncate">{u.name}</span>
+                    {isSelected && <Check className="w-3.5 h-3.5 text-white shrink-0 ml-1" />}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Password Input */}
@@ -185,7 +201,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           {/* Login Button */}
           <button
             type="submit"
-            className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md active:scale-[0.99] flex items-center justify-center space-x-2 mt-2"
+            className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md active:scale-[0.99] flex items-center justify-center space-x-2 mt-1"
             id="login-submit-btn"
           >
             <LogIn className="w-4 h-4" />
@@ -195,9 +211,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         </form>
 
         {/* Security Note */}
-        <div className="pt-3 border-t border-slate-100 text-center text-[11px] text-slate-500 flex items-center justify-center gap-1.5 font-medium">
+        <div className="pt-2 border-t border-slate-100 text-center text-[11px] text-slate-500 flex items-center justify-center gap-1.5 font-medium">
           <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
-          <span>Default password is <strong className="text-slate-800">12345</strong>. You can change your password anytime after login.</span>
+          <span>Default password is <strong className="text-slate-800">12345</strong>.</span>
         </div>
 
       </div>
