@@ -1,0 +1,6 @@
+{
+  "name": "SpaFlow Spa Management",
+  "description": "Comprehensive Spa Management System for services, categories, company settings, staff, receipt printing, and analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
