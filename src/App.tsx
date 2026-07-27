@@ -25,7 +25,7 @@ import {
   loadCustomers, saveCustomers,
   loadTheme, saveTheme,
   exportBackupJSON, importBackupJSON, importLegacyJSON, resetToFactoryDefaults,
-  capitalizeWords
+  capitalizeWords, deduplicateStaff
 } from './lib/storage';
 
 import { Header } from './components/Header';
@@ -343,7 +343,7 @@ export default function App() {
       id: 'stf-' + Date.now(),
       createdAt: new Date().toISOString(),
     };
-    const updated = [...staff, newMember];
+    const updated = deduplicateStaff([...staff, newMember]);
     setStaff(updated);
     saveStaff(updated);
 
@@ -353,8 +353,9 @@ export default function App() {
 
   const handleEditStaff = (updatedMember: Staff) => {
     const updated = staff.map((st) => (st.id === updatedMember.id ? updatedMember : st));
-    setStaff(updated);
-    saveStaff(updated);
+    const deduplicated = deduplicateStaff(updated);
+    setStaff(deduplicated);
+    saveStaff(deduplicated);
 
     const log = createActivityLog('Staff Member Updated', `Updated staff member "${updatedMember.name}"`, 'staff');
     setActivityLogs((prev) => [log, ...prev]);

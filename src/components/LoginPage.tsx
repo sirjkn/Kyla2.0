@@ -49,7 +49,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   company,
   onLogin,
 }) => {
-  // Build user options: Admin + Staff
+  // Build user options: Admin + Staff with deduplication
   const adminUser = {
     id: 'admin-owner',
     name: 'System Admin / Owner',
@@ -62,7 +62,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     role: st.role || 'Therapist & Staff',
   }));
 
-  const allUsers = [adminUser, ...staffUsers];
+  const rawUsers = [adminUser, ...staffUsers];
+  const seenUserKeys = new Set<string>();
+  const allUsers: Array<{ id: string; name: string; role: string }> = [];
+
+  for (const user of rawUsers) {
+    if (!user || !user.name) continue;
+    const norm = user.name.trim().toLowerCase();
+    const isAdminVariant = norm === 'system admin' || norm === 'system admin / owner' || norm === 'admin' || norm === 'administrator';
+    const key = isAdminVariant ? 'system admin' : norm;
+
+    if (!seenUserKeys.has(key)) {
+      seenUserKeys.add(key);
+      allUsers.push(user);
+    }
+  }
 
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string>(allUsers[0].id);

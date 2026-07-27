@@ -190,28 +190,64 @@ export function saveServices(services: Service[]): void {
   }
 }
 
+export function deduplicateStaff(staffList: Staff[]): Staff[] {
+  const seenNames = new Set<string>();
+  const seenIds = new Set<string>();
+  const result: Staff[] = [];
+
+  for (const s of staffList) {
+    if (!s || !s.name || !s.name.trim()) continue;
+    const trimmedName = s.name.trim();
+    const normName = trimmedName.toLowerCase();
+
+    // Check if name is a system admin duplicate
+    const isSystemAdmin =
+      normName === 'system admin' ||
+      normName === 'system admin / owner' ||
+      normName === 'admin' ||
+      normName === 'administrator';
+
+    if (seenIds.has(s.id)) continue;
+    if (seenNames.has(normName)) continue;
+    if (isSystemAdmin && seenNames.has('system admin')) continue;
+
+    seenIds.add(s.id);
+    if (isSystemAdmin) {
+      seenNames.add('system admin');
+    } else {
+      seenNames.add(normName);
+    }
+
+    result.push({
+      ...s,
+      name: capitalizeWords(trimmedName),
+    });
+  }
+
+  return result;
+}
+
 export function loadStaff(): Staff[] {
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.STAFF);
-    if (!saved) return INITIAL_STAFF;
-    const loaded: Staff[] = JSON.parse(saved);
-    const existingIds = new Set(loaded.map(s => s.id));
-    const missing = INITIAL_STAFF.filter(s => !existingIds.has(s.id));
-    if (missing.length > 0) {
-      const merged = [...loaded, ...missing];
-      localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(merged));
-      return merged;
-    }
-    return loaded;
+    const loaded: Staff[] = saved ? JSON.parse(saved) : INITIAL_STAFF;
+    
+    // Combine with INITIAL_STAFF to ensure default staff exist, then deduplicate
+    const combined = [...loaded, ...INITIAL_STAFF];
+    const deduplicated = deduplicateStaff(combined);
+    
+    localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(deduplicated));
+    return deduplicated;
   } catch (e) {
     console.error('Failed to load staff from localStorage', e);
-    return INITIAL_STAFF;
+    return deduplicateStaff(INITIAL_STAFF);
   }
 }
 
 export function saveStaff(staff: Staff[]): void {
   try {
-    localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(staff));
+    const deduplicated = deduplicateStaff(staff);
+    localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(deduplicated));
   } catch (e) {
     console.error('Failed to save staff', e);
   }
