@@ -25,7 +25,8 @@ import {
   FileText, 
   X, 
   Clock, 
-  Check 
+  Check,
+  Calendar
 } from 'lucide-react';
 
 interface POSManagerProps {
@@ -59,7 +60,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [customerName, setCustomerName] = useState('Walk-in Client');
-  const [customerPhone, setCustomerPhone] = useState('');
+  const [orderDate, setOrderDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [selectedStaffId, setSelectedStaffId] = useState<string>(() => {
     return staff.find((s) => s.status === 'active')?.id || staff[0]?.id || '';
   });
@@ -170,11 +171,21 @@ export const POSManager: React.FC<POSManagerProps> = ({
       };
     });
 
+    // Construct createdAt timestamp with orderDate (supports backdating)
+    const now = new Date();
+    const timePart = now.toTimeString().split(' ')[0]; // HH:mm:ss
+    let customCreatedAt = now.toISOString();
+    if (orderDate) {
+      const parsed = new Date(`${orderDate}T${timePart}`);
+      if (!isNaN(parsed.getTime())) {
+        customCreatedAt = parsed.toISOString();
+      }
+    }
+
     const newTrx: Transaction = {
       id: 'trx-' + Date.now(),
       receiptNo,
       customerName: customerName.trim() || 'Walk-in Client',
-      customerPhone: customerPhone.trim() || undefined,
       items: transactionItems,
       subtotal: Math.round((subtotalNet - taxAmount) * 100) / 100,
       taxAmount: Math.round(taxAmount * 100) / 100,
@@ -191,7 +202,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
       staffId: selectedStaffId || undefined,
       staffName: selectedStaff?.name || undefined,
       status: 'completed',
-      createdAt: new Date().toISOString(),
+      createdAt: customCreatedAt,
       notes: notes.trim() || undefined,
     };
 
@@ -207,6 +218,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
     setCashTendered('');
     setCardLast4('');
     setNotes('');
+    setOrderDate(new Date().toISOString().slice(0, 10));
   };
 
   // Thermal Print helper
@@ -567,14 +579,17 @@ export const POSManager: React.FC<POSManagerProps> = ({
                   </select>
                 </div>
 
-                <input
-                  type="text"
-                  placeholder="Phone Number (Optional)"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium border border-transparent focus:border-blue-500 focus:outline-none"
-                  id="pos-customer-phone-input"
-                />
+                <div className="flex items-center space-x-2 bg-slate-100 dark:bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
+                  <Calendar className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 flex-shrink-0">Order Date:</span>
+                  <input
+                    type="date"
+                    value={orderDate}
+                    onChange={(e) => setOrderDate(e.target.value)}
+                    className="w-full bg-transparent text-slate-900 dark:text-slate-100 text-xs font-semibold focus:outline-none cursor-pointer"
+                    id="pos-order-date-input"
+                  />
+                </div>
               </div>
             </div>
 

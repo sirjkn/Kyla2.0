@@ -132,7 +132,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             >
               {allUsers.map((u) => (
                 <option key={u.id} value={u.id}>
-                  {u.name} — ({u.role})
+                  {u.name}
                 </option>
               ))}
             </select>
