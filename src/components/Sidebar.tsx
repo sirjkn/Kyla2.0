@@ -97,20 +97,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   id={`nav-item-${item.id}`}
                   className={`w-full flex items-center justify-between p-3 rounded-xl text-left font-medium text-sm transition-all group ${
                     isActive
-                      ? 'bg-teal-600 text-white shadow-md shadow-teal-600/20'
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
                       : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
                   }`}
                 >
                   <div className="flex items-center space-x-3 min-w-0">
                     <Icon className={`w-5 h-5 flex-shrink-0 ${
-                      isActive ? 'text-white' : 'text-slate-400 group-hover:text-teal-600'
+                      isActive ? 'text-white' : 'text-slate-400 group-hover:text-blue-600'
                     }`} />
                     <div className="truncate">
                       <div className="font-semibold leading-tight flex items-center gap-1.5">
                         <span>{item.label}</span>
                       </div>
                       <p className={`text-[11px] truncate ${
-                        isActive ? 'text-teal-100' : 'text-slate-500'
+                        isActive ? 'text-blue-100' : 'text-slate-500'
                       }`}>
                         {item.description}
                       </p>
@@ -133,7 +133,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <span className={`text-xs px-2 py-0.5 rounded-full font-mono font-bold ${
                         isActive
                           ? 'bg-white/20 text-white'
-                          : 'bg-slate-100 text-teal-700 border border-slate-200'
+                          : 'bg-slate-100 text-blue-700 border border-slate-200'
                       }`}>
                         {item.count}
                       </span>
@@ -153,7 +153,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2 text-xs">
           <div className="flex items-center justify-between text-slate-700 font-semibold">
             <span>Quick System Stats</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
           </div>
           <div className="grid grid-cols-2 gap-2 text-slate-500 pt-1">
             <div className="bg-white p-2 rounded-lg border border-slate-200">

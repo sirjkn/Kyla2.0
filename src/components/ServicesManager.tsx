@@ -211,7 +211,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
               Service Catalog Management
             </span>
           </div>
@@ -234,7 +234,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
             }`}
             id="tab-services-list"
           >
-            <Sparkles className="w-4 h-4 text-teal-500" />
+            <Sparkles className="w-4 h-4 text-blue-500" />
             <span>Services ({services.length})</span>
           </button>
 
@@ -270,7 +270,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                 placeholder="Search service title or description..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -283,7 +283,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
               <select
                 value={selectedCategoryFilter}
                 onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-                className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All Categories ({services.length})</option>
                 {categories.map((cat) => (
@@ -297,7 +297,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All Statuses</option>
                 <option value="active">Active Only</option>
@@ -312,7 +312,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                   onClick={() => setViewMode('grid')}
                   className={`p-1.5 rounded-lg transition-colors ${
                     viewMode === 'grid' 
-                      ? 'bg-white dark:bg-slate-900 text-teal-600 dark:text-teal-400 shadow-xs' 
+                      ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' 
                       : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
                   }`}
                   title="Grid View"
@@ -323,7 +323,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                   onClick={() => setViewMode('table')}
                   className={`p-1.5 rounded-lg transition-colors ${
                     viewMode === 'table' 
-                      ? 'bg-white dark:bg-slate-900 text-teal-600 dark:text-teal-400 shadow-xs' 
+                      ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs' 
                       : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
                   }`}
                   title="Table View"
@@ -334,7 +334,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
 
               <button
                 onClick={() => handleOpenServiceModal()}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 active:scale-95"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 active:scale-95"
                 id="add-new-service-btn"
               >
                 <Plus className="w-4 h-4" />
@@ -370,7 +370,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                             onClick={() => onEditService({ ...service, isActive: !service.isActive })}
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-md border transition-colors ${
                               service.isActive 
-                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' 
+                                ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 hover:bg-blue-500/20' 
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
                             }`}
                             title="Click to toggle status"
@@ -380,7 +380,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                         </div>
                       </div>
 
-                      <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                      <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                         {service.name}
                       </h3>
 
@@ -396,7 +396,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                           <Clock className="w-3.5 h-3.5 text-slate-400" />
                           {service.durationMinutes}m
                         </span>
-                        <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+                        <span className="font-mono font-bold text-blue-600 dark:text-blue-400 text-sm">
                           {company.currency || 'KES'} {service.price.toLocaleString()}
                         </span>
                       </div>
@@ -404,7 +404,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                       <div className="flex items-center space-x-1">
                         <button
                           onClick={() => handleOpenServiceModal(service)}
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-950/60 transition-colors"
+                          className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/60 transition-colors"
                           title="Edit Service"
                         >
                           <Edit3 className="w-4 h-4" />
@@ -432,7 +432,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                   </p>
                   <button
                     onClick={() => handleOpenServiceModal()}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-teal-600 text-white rounded-xl text-xs font-bold shadow-sm"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-sm"
                   >
                     <Plus className="w-4 h-4" /> Add Service
                   </button>
@@ -474,13 +474,13 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                             </span>
                           </td>
                           <td className="p-3.5 font-mono">{srv.durationMinutes} mins</td>
-                          <td className="p-3.5 font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                          <td className="p-3.5 font-mono font-bold text-blue-600 dark:text-blue-400">
                             {company.currency || 'KES'} {srv.price.toLocaleString()}
                           </td>
                           <td className="p-3.5">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                               srv.isActive 
-                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
+                                ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' 
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
                             }`}>
                               {srv.isActive ? 'Active' : 'Disabled'}
@@ -489,7 +489,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                           <td className="p-3.5 text-right space-x-1">
                             <button
                               onClick={() => handleOpenServiceModal(srv)}
-                              className="p-1.5 text-slate-500 hover:text-teal-600 dark:hover:text-teal-400"
+                              className="p-1.5 text-slate-500 hover:text-blue-600 dark:hover:text-blue-400"
                             >
                               <Edit3 className="w-4 h-4" />
                             </button>
@@ -613,7 +613,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
             
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
               <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-teal-500" />
+                <Sparkles className="w-5 h-5 text-blue-500" />
                 {editingService ? 'Edit Spa Service' : 'Add New Spa Service'}
               </h3>
               <button
@@ -637,7 +637,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                   placeholder="e.g. Deep Tissue Muscle Massage"
                   value={serviceFormData.name}
                   onChange={(e) => setServiceFormData({ ...serviceFormData, name: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 font-semibold"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold"
                 />
               </div>
 
@@ -650,7 +650,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                   required
                   value={serviceFormData.categoryId}
                   onChange={(e) => setServiceFormData({ ...serviceFormData, categoryId: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 font-semibold"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold"
                 >
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
@@ -676,7 +676,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                       required
                       value={serviceFormData.durationMinutes}
                       onChange={(e) => setServiceFormData({ ...serviceFormData, durationMinutes: Number(e.target.value) })}
-                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -694,7 +694,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                       required
                       value={serviceFormData.price}
                       onChange={(e) => setServiceFormData({ ...serviceFormData, price: Number(e.target.value) })}
-                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -710,7 +710,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                   placeholder="Describe treatment benefits, products used, or recommendations..."
                   value={serviceFormData.description}
                   onChange={(e) => setServiceFormData({ ...serviceFormData, description: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 ></textarea>
               </div>
 
@@ -721,7 +721,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                   id="modal-service-is-active"
                   checked={serviceFormData.isActive}
                   onChange={(e) => setServiceFormData({ ...serviceFormData, isActive: e.target.checked })}
-                  className="w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500"
+                  className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
                 />
                 <label htmlFor="modal-service-is-active" className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                   Service is active & available in bookings/POS
@@ -739,7 +739,7 @@ export const ServicesManager: React.FC<ServicesManagerProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-500 text-white transition-all shadow-md active:scale-95"
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md active:scale-95"
                 >
                   {editingService ? 'Save Changes' : 'Create Service'}
                 </button>

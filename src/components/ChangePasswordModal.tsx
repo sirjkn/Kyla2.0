@@ -62,7 +62,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
         </button>
 
         <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-          <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-600 flex items-center justify-center font-bold">
+          <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold">
             <KeyRound className="w-5 h-5" />
           </div>
           <div>
@@ -86,7 +86,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               placeholder="Enter current password..."
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-teal-500"
+              className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-600"
               id="change-pass-current"
               required
             />
@@ -102,7 +102,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               placeholder="Enter new password..."
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-teal-500"
+              className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-600"
               id="change-pass-new"
               required
             />
@@ -118,7 +118,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               placeholder="Confirm new password..."
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-teal-500"
+              className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-mono font-bold border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-600"
               id="change-pass-confirm"
               required
             />
@@ -132,7 +132,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
           )}
 
           {successMsg && (
-            <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-200 dark:border-emerald-900 flex items-center gap-1.5">
+            <p className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 p-2.5 rounded-xl border border-blue-200 dark:border-blue-900 flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4" />
               <span>{successMsg}</span>
             </p>
@@ -148,7 +148,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs transition-colors shadow-md"
+              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors shadow-md"
               id="change-pass-submit"
             >
               Save New Password

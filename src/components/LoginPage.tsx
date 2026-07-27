@@ -89,17 +89,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 selection:bg-teal-500 selection:text-white relative overflow-hidden">
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 selection:bg-blue-500 selection:text-white relative overflow-hidden">
       
       {/* Background Decorative Soft Orbs */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl relative z-10 space-y-6">
         
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-teal-600 to-emerald-500 flex items-center justify-center text-white mx-auto shadow-md shadow-teal-600/20">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white mx-auto shadow-md shadow-blue-600/20">
             <Sparkles className="w-7 h-7 text-white" />
           </div>
           <div>
@@ -118,7 +118,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           {/* Select Username / Staff */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-teal-600" />
+              <User className="w-3.5 h-3.5 text-blue-600" />
               <span>Select Account Username</span>
             </label>
             <select
@@ -127,7 +127,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 setSelectedUserId(e.target.value);
                 setErrorMsg('');
               }}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:outline-none focus:border-teal-600 focus:bg-white transition-colors"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               id="login-username-select"
             >
               {allUsers.map((u) => (
@@ -142,10 +142,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-teal-600" />
+                <Lock className="w-3.5 h-3.5 text-blue-600" />
                 <span>Password</span>
               </label>
-              <span className="text-[10px] text-teal-700 font-bold font-mono bg-teal-50 px-2 py-0.5 rounded-md border border-teal-200/80">
+              <span className="text-[10px] text-blue-700 font-bold font-mono bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/80">
                 Default: 12345
               </span>
             </div>
@@ -159,7 +159,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   setPassword(e.target.value);
                   setErrorMsg('');
                 }}
-                className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-mono font-bold focus:outline-none focus:border-teal-600 focus:bg-white transition-colors"
+                className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-mono font-bold focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
                 id="login-password-input"
                 autoFocus
               />
@@ -185,7 +185,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           {/* Login Button */}
           <button
             type="submit"
-            className="w-full py-3 px-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md active:scale-[0.99] flex items-center justify-center space-x-2 mt-2"
+            className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md active:scale-[0.99] flex items-center justify-center space-x-2 mt-2"
             id="login-submit-btn"
           >
             <LogIn className="w-4 h-4" />
@@ -196,7 +196,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
         {/* Security Note */}
         <div className="pt-3 border-t border-slate-100 text-center text-[11px] text-slate-500 flex items-center justify-center gap-1.5 font-medium">
-          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+          <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
           <span>Default password is <strong className="text-slate-800">12345</strong>. You can change your password anytime after login.</span>
         </div>
 

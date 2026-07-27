@@ -42,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
         
         {/* Brand & Company Details */}
         <div className="flex items-center space-x-3 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-500 flex items-center justify-center text-white font-bold shadow-md shadow-teal-600/20 flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-bold shadow-md shadow-blue-600/20 flex-shrink-0">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
           <div className="min-w-0">
@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
               <h1 className="font-bold text-base sm:text-lg text-slate-900 tracking-tight truncate">
                 {company.businessName || 'Kyla Barber Shop'}
               </h1>
-              <span className="bg-teal-50 text-teal-700 border border-teal-200 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full flex-shrink-0 hidden sm:inline-block">
+              <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full flex-shrink-0 hidden sm:inline-block">
                 POS System
               </span>
             </div>
@@ -67,20 +67,20 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Time / Date Badge */}
           <div className="hidden lg:flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700">
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-teal-600" />
+              <Calendar className="w-3.5 h-3.5 text-blue-600" />
               <span>{currentDate}</span>
             </div>
             <span className="text-slate-300">|</span>
             <div className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-teal-600" />
-              <span>Currency: <strong className="text-teal-700 font-mono">{company.currency || 'KES'}</strong></span>
+              <Clock className="w-3.5 h-3.5 text-blue-600" />
+              <span>Currency: <strong className="text-blue-700 font-mono">{company.currency || 'KES'}</strong></span>
             </div>
           </div>
 
           {/* 1. Make a Sale Button */}
           <button
             onClick={onNavigateToPos}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white transition-all shadow-xs active:scale-95"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-xs active:scale-95"
             id="header-make-sale-btn"
           >
             <ShoppingBag className="w-3.5 h-3.5" />
@@ -91,7 +91,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* 2. Logged in User Profile Badge */}
           {currentUser && (
             <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg p-1 text-xs">
-              <div className="w-7 h-7 rounded-md bg-teal-600 text-white flex items-center justify-center font-bold text-xs">
+              <div className="w-7 h-7 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
                 {currentUser.name.charAt(0).toUpperCase()}
               </div>
               <div className="hidden sm:block text-left pr-1 min-w-0 max-w-[120px]">
@@ -102,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({
               {onChangePassword && (
                 <button
                   onClick={onChangePassword}
-                  className="p-1.5 rounded-md text-slate-500 hover:text-teal-600 hover:bg-slate-200 transition-colors"
+                  className="p-1.5 rounded-md text-slate-500 hover:text-blue-600 hover:bg-slate-200 transition-colors"
                   title="Change Password"
                   id="header-change-password-btn"
                 >

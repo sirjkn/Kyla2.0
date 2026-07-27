@@ -167,7 +167,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
     } else {
       onAddStaff({
         ...staffForm,
-        avatarColor: 'bg-emerald-500',
+        avatarColor: 'bg-blue-500',
       });
     }
     setIsStaffModalOpen(false);
@@ -423,7 +423,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
             }`}
             id="subtab-receipt"
           >
-            <Printer className="w-3.5 h-3.5 text-teal-500" />
+            <Printer className="w-3.5 h-3.5 text-blue-500" />
             <span>Receipt Templates</span>
           </button>
 
@@ -436,7 +436,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
             }`}
             id="subtab-payment"
           >
-            <Smartphone className="w-3.5 h-3.5 text-emerald-500" />
+            <Smartphone className="w-3.5 h-3.5 text-blue-500" />
             <span>Payment Methods</span>
           </button>
 
@@ -480,7 +480,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                 Spa & Business Information
               </h3>
               {companySavedMsg && (
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1 animate-fadeIn">
+                <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-3 py-1 rounded-full border border-blue-500/20 flex items-center gap-1 animate-fadeIn">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Company profile saved!
                 </span>
               )}
@@ -637,7 +637,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                     {companyForm.businessName || 'Business Name'}
                   </h4>
                   <p className="text-xs text-indigo-200">
-                    Currency: <span className="font-mono font-bold text-emerald-400">{companyForm.currency || 'KES'}</span>
+                    Currency: <span className="font-mono font-bold text-blue-400">{companyForm.currency || 'KES'}</span>
                   </p>
                 </div>
               </div>
@@ -717,7 +717,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
 
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                       member.status === 'active' 
-                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
+                        ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' 
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
                     }`}>
                       {member.status === 'active' ? 'Active' : 'Inactive'}
@@ -794,11 +794,11 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
           <div className="lg:col-span-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-6">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
               <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Printer className="w-5 h-5 text-teal-500" />
+                <Printer className="w-5 h-5 text-blue-500" />
                 Thermal Receipt Template Options
               </h3>
               {receiptSavedMsg && (
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1 animate-fadeIn">
+                <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-3 py-1 rounded-full border border-blue-500/20 flex items-center gap-1 animate-fadeIn">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Template saved!
                 </span>
               )}
@@ -816,7 +816,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                   value={receiptForm.headerNote}
                   onChange={(e) => setReceiptForm({ ...receiptForm, headerNote: e.target.value })}
                   placeholder="e.g. Welcome to Serenity Luxe Spa!"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -830,7 +830,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                   value={receiptForm.footerNote}
                   onChange={(e) => setReceiptForm({ ...receiptForm, footerNote: e.target.value })}
                   placeholder="e.g. Thank you for your business! Please visit us again."
-                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -846,7 +846,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                     id="receipt-show-email"
                     checked={receiptForm.showEmail}
                     onChange={(e) => setReceiptForm({ ...receiptForm, showEmail: e.target.checked })}
-                    className="w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500"
+                    className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
                   />
                   <label htmlFor="receipt-show-email" className="text-xs text-slate-700 dark:text-slate-300">
                     Include Business Email on Receipt
@@ -859,7 +859,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                     id="receipt-show-website"
                     checked={receiptForm.showWebsite}
                     onChange={(e) => setReceiptForm({ ...receiptForm, showWebsite: e.target.checked })}
-                    className="w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500"
+                    className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
                   />
                   <label htmlFor="receipt-show-website" className="text-xs text-slate-700 dark:text-slate-300">
                     Include Website URL on Receipt
@@ -878,7 +878,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                     onClick={() => setReceiptForm({ ...receiptForm, paperWidth: '80mm' })}
                     className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
                       receiptForm.paperWidth === '80mm'
-                        ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
                         : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
                     }`}
                   >
@@ -889,7 +889,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                     onClick={() => setReceiptForm({ ...receiptForm, paperWidth: '58mm' })}
                     className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
                       receiptForm.paperWidth === '58mm'
-                        ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
                         : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
                     }`}
                   >
@@ -900,7 +900,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
 
               {/* Interactive Sample Data Inputs for Live Preview */}
               <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
-                <span className="block text-xs font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
+                <span className="block text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
                   Sample Variables for Preview
                 </span>
 
@@ -951,7 +951,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                 <button
                   type="button"
                   onClick={handlePrintReceiptWindow}
-                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-teal-400 font-bold rounded-xl text-xs border border-slate-700 flex items-center gap-2 active:scale-95"
+                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-blue-400 font-bold rounded-xl text-xs border border-slate-700 flex items-center gap-2 active:scale-95"
                   id="print-sample-receipt-btn"
                 >
                   <Printer className="w-4 h-4" />
@@ -960,7 +960,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
 
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl text-xs transition-all shadow-md flex items-center gap-2 active:scale-95"
+                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition-all shadow-md flex items-center gap-2 active:scale-95"
                 >
                   <Save className="w-4 h-4" />
                   <span>Save Template</span>
@@ -974,7 +974,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
           <div className="lg:col-span-6 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                <Eye className="w-4 h-4 text-teal-500" />
+                <Eye className="w-4 h-4 text-blue-500" />
                 Live 80mm Thermal Receipt Layout
               </span>
               <span className="text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono px-2 py-0.5 rounded font-bold">
@@ -1132,7 +1132,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
             {backupMsg && (
               <div className={`p-4 rounded-2xl border text-xs font-bold flex items-center justify-between ${
                 backupMsg.type === 'success'
-                  ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                  ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-500/30'
                   : 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-500/30'
               }`}>
                 <span>{backupMsg.text}</span>
@@ -1147,7 +1147,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
               {/* Export Card */}
               <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4 flex flex-col justify-between">
                 <div>
-                  <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3">
                     <Download className="w-5 h-5" />
                   </div>
                   <h4 className="font-extrabold text-base text-slate-900 dark:text-slate-100">
@@ -1160,7 +1160,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
 
                 <button
                   onClick={onExportBackup}
-                  className="w-full py-3 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2 active:scale-95"
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2 active:scale-95"
                   id="export-backup-btn"
                 >
                   <Download className="w-4 h-4" />

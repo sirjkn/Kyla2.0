@@ -48,7 +48,7 @@ export const PaymentSettings: React.FC<PaymentSettingsProps> = ({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Smartphone className="w-5 h-5 text-emerald-500" />
+            <Smartphone className="w-5 h-5 text-blue-500" />
             Payment Methods Configuration
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -58,7 +58,7 @@ export const PaymentSettings: React.FC<PaymentSettingsProps> = ({
 
         <button
           type="submit"
-          className="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs transition-all shadow-md flex items-center space-x-2"
+          className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-all shadow-md flex items-center space-x-2"
           id="save-payment-methods-btn"
         >
           <Save className="w-4 h-4" />
@@ -67,7 +67,7 @@ export const PaymentSettings: React.FC<PaymentSettingsProps> = ({
       </div>
 
       {savedSuccess && (
-        <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 p-3 rounded-xl text-xs font-bold flex items-center space-x-2 animate-fadeIn">
+        <div className="bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400 p-3 rounded-xl text-xs font-bold flex items-center space-x-2 animate-fadeIn">
           <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
           <span>Payment methods updated successfully! Changes applied to Point of Sale register.</span>
         </div>
@@ -96,7 +96,7 @@ export const PaymentSettings: React.FC<PaymentSettingsProps> = ({
                   <div
                     className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold ${
                       isMpesa
-                        ? 'bg-emerald-600'
+                        ? 'bg-blue-600'
                         : isCash
                         ? 'bg-amber-600'
                         : 'bg-purple-600'
@@ -108,7 +108,7 @@ export const PaymentSettings: React.FC<PaymentSettingsProps> = ({
                     <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
                       <span>{pm.name}</span>
                       {pm.isDefault && (
-                        <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+                        <span className="text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full font-bold">
                           Default POS Method
                         </span>
                       )}
@@ -125,7 +125,7 @@ export const PaymentSettings: React.FC<PaymentSettingsProps> = ({
                       onClick={() => handleSetDefault(pm.id)}
                       className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${
                         pm.isDefault
-                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                          ? 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400'
                           : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                       }`}
                     >
@@ -141,7 +141,7 @@ export const PaymentSettings: React.FC<PaymentSettingsProps> = ({
                       onChange={() => handleToggleEnable(pm.id)}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                    <div className="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                   </label>
                 </div>
               </div>

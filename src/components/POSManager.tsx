@@ -341,14 +341,14 @@ export const POSManager: React.FC<POSManagerProps> = ({
                 placeholder="Search for something... (e.g. massage, facial, manicure)"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 text-xs font-medium border border-transparent focus:border-teal-500 focus:outline-none transition-all"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 text-xs font-medium border border-transparent focus:border-blue-500 focus:outline-none transition-all"
                 id="pos-search-input"
               />
             </div>
 
             {/* Quick Service Count */}
             <div className="flex items-center space-x-2 text-xs text-slate-500 dark:text-slate-400 font-medium px-1 flex-shrink-0">
-              <Sparkles className="w-4 h-4 text-teal-500" />
+              <Sparkles className="w-4 h-4 text-blue-500" />
               <span>Showing <strong>{filteredServices.length}</strong> treatments</span>
             </div>
           </div>
@@ -363,13 +363,13 @@ export const POSManager: React.FC<POSManagerProps> = ({
                 onClick={() => setSelectedCategoryId('all')}
                 className={`p-2.5 sm:p-3 rounded-xl border transition-all text-left flex flex-col justify-between min-h-[64px] sm:min-h-[72px] ${
                   selectedCategoryId === 'all'
-                    ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-500/20 font-bold'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm ring-2 ring-blue-500/20 font-bold'
                     : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200 font-semibold'
                 }`}
                 id="pos-cat-all"
               >
                 <div className="flex items-center justify-between w-full">
-                  <Sparkles className={`w-4 h-4 ${selectedCategoryId === 'all' ? 'text-white' : 'text-teal-600'}`} />
+                  <Sparkles className={`w-4 h-4 ${selectedCategoryId === 'all' ? 'text-white' : 'text-blue-600'}`} />
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
                       selectedCategoryId === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
@@ -391,7 +391,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
                     onClick={() => setSelectedCategoryId(cat.id)}
                     className={`p-2.5 sm:p-3 rounded-xl border transition-all text-left flex flex-col justify-between min-h-[64px] sm:min-h-[72px] ${
                       isSelected
-                        ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-500/20 font-bold'
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm ring-2 ring-blue-500/20 font-bold'
                         : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200 font-semibold'
                     }`}
                     id={`pos-cat-${cat.id}`}
@@ -443,7 +443,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
                   onClick={() => handleAddToCart(service)}
                   className={`group relative rounded-xl p-2.5 sm:p-3 transition-all duration-200 cursor-pointer flex flex-col justify-between hover:shadow-md border ${
                     inCart
-                      ? 'border-teal-600 ring-2 ring-teal-600/20 bg-teal-50/20 shadow-xs'
+                      ? 'border-blue-600 ring-2 ring-blue-600/20 bg-blue-50/20 shadow-xs'
                       : 'border-slate-200 bg-white hover:border-slate-300'
                   }`}
                   id={`pos-service-card-${service.id}`}
@@ -453,18 +453,18 @@ export const POSManager: React.FC<POSManagerProps> = ({
                     <div className="flex items-center justify-between gap-1">
                       <span
                         className="text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider text-white truncate max-w-[100px]"
-                        style={{ backgroundColor: cat?.color || '#0d9488' }}
+                        style={{ backgroundColor: cat?.color || '#2563eb' }}
                       >
                         {cat?.name || 'Service'}
                       </span>
                       
                       <span className="text-[10px] text-slate-500 font-mono flex items-center gap-0.5 flex-shrink-0">
-                        <Clock className="w-3 h-3 text-teal-600" />
+                        <Clock className="w-3 h-3 text-blue-600" />
                         {service.durationMinutes}m
                       </span>
                     </div>
 
-                    <h4 className="font-bold text-xs text-slate-900 group-hover:text-teal-700 transition-colors line-clamp-1 pt-0.5">
+                    <h4 className="font-bold text-xs text-slate-900 group-hover:text-blue-700 transition-colors line-clamp-1 pt-0.5">
                       {service.name}
                     </h4>
 
@@ -477,7 +477,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
                   <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-100">
                     <div>
                       <span className="text-[9px] text-slate-400 block uppercase font-mono leading-none">Price</span>
-                      <span className="text-xs font-black text-teal-700 font-mono">
+                      <span className="text-xs font-black text-blue-700 font-mono">
                         {company.currency || 'KES'} {service.price.toLocaleString()}
                       </span>
                     </div>
@@ -489,8 +489,8 @@ export const POSManager: React.FC<POSManagerProps> = ({
                       }}
                       className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center space-x-1 ${
                         inCart
-                          ? 'bg-teal-600 text-white shadow-xs'
-                          : 'bg-slate-100 text-slate-800 group-hover:bg-teal-600 group-hover:text-white'
+                          ? 'bg-blue-600 text-white shadow-xs'
+                          : 'bg-slate-100 text-slate-800 group-hover:bg-blue-600 group-hover:text-white'
                       }`}
                     >
                       {inCart ? (
@@ -525,7 +525,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
             <div className="border-b border-slate-200 dark:border-slate-800 pb-3">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+                  <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
                     <ShoppingCart className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
@@ -547,7 +547,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
                       placeholder="Walk-in Client"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full pl-8 pr-2 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium border border-transparent focus:border-teal-500 focus:outline-none"
+                      className="w-full pl-8 pr-2 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium border border-transparent focus:border-blue-500 focus:outline-none"
                       id="pos-customer-name-input"
                     />
                   </div>
@@ -555,7 +555,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
                   <select
                     value={selectedStaffId}
                     onChange={(e) => setSelectedStaffId(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium border border-transparent focus:border-teal-500 focus:outline-none truncate font-medium"
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium border border-transparent focus:border-blue-500 focus:outline-none truncate font-medium"
                     id="pos-employee-select"
                   >
                     <option value="">Employee: Unassigned</option>
@@ -572,7 +572,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
                   placeholder="Phone Number (Optional)"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium border border-transparent focus:border-teal-500 focus:outline-none"
+                  className="w-full px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium border border-transparent focus:border-blue-500 focus:outline-none"
                   id="pos-customer-phone-input"
                 />
               </div>
@@ -599,7 +599,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
                         <div className="font-bold text-xs text-slate-900 dark:text-slate-100 truncate">
                           {item.service.name}
                         </div>
-                        <div className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                        <div className="text-[11px] font-mono text-blue-600 dark:text-blue-400 font-bold">
                           {company.currency || 'KES'} {effectivePrice.toLocaleString()}
                           {item.discount && item.discount > 0 ? (
                             <span className="text-[10px] text-slate-400 line-through ml-1 font-normal">
@@ -689,7 +689,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
 
               <div className="flex justify-between items-center text-sm font-black text-slate-900 dark:text-slate-100 pt-2 border-t border-slate-200 dark:border-slate-800">
                 <span>Total Payable</span>
-                <span className="font-mono text-emerald-600 dark:text-emerald-400 text-base">
+                <span className="font-mono text-blue-600 dark:text-blue-400 text-base">
                   {company.currency || 'KES'} {grandTotal.toLocaleString()}
                 </span>
               </div>
@@ -712,7 +712,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
                       onClick={() => setSelectedPaymentMethod(pm.id)}
                       className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center justify-center space-y-1 ${
                         isSelected
-                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-md'
                           : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                       }`}
                       id={`pos-pm-${pm.id}`}
@@ -728,8 +728,8 @@ export const POSManager: React.FC<POSManagerProps> = ({
 
               {/* Payment Method Details Input */}
               {selectedPaymentMethod === 'mpesa' && (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl space-y-1.5 text-xs">
-                  <div className="flex items-center justify-between text-[11px] text-emerald-800 dark:text-emerald-300 font-semibold">
+                <div className="bg-blue-500/10 border border-blue-500/20 p-2.5 rounded-xl space-y-1.5 text-xs">
+                  <div className="flex items-center justify-between text-[11px] text-blue-800 dark:text-blue-300 font-semibold">
                     <span>M-Pesa Till / Paybill:</span>
                     <strong className="font-mono">
                       {paymentMethods.find((m) => m.id === 'mpesa')?.mpesaNumber || '889900'}
@@ -740,7 +740,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
                     placeholder="M-Pesa Transaction Code (e.g. QGH829102K)"
                     value={mpesaRef}
                     onChange={(e) => setMpesaRef(e.target.value.toUpperCase())}
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-700 text-slate-900 dark:text-slate-100 text-xs font-mono uppercase focus:outline-none"
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-blue-300 dark:border-blue-700 text-slate-900 dark:text-slate-100 text-xs font-mono uppercase focus:outline-none"
                     id="pos-mpesa-ref-input"
                   />
                 </div>
@@ -788,7 +788,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
               disabled={cart.length === 0}
               className={`w-full py-3.5 px-4 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center space-x-2 shadow-lg ${
                 cart.length > 0
-                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30 active:scale-95 cursor-pointer'
+                  ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30 active:scale-95 cursor-pointer'
                   : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
               }`}
               id="pos-checkout-btn"
@@ -815,7 +815,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
             </button>
 
             <div className="text-center space-y-2">
-              <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-7 h-7" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
@@ -834,7 +834,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
               </div>
               <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
                 <span>Payment Method:</span>
-                <span className="font-bold uppercase text-emerald-600 dark:text-emerald-400">
+                <span className="font-bold uppercase text-blue-600 dark:text-blue-400">
                   {completedTransaction.paymentMethod}
                 </span>
               </div>
@@ -848,7 +848,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
               </div>
               <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-800 font-bold text-sm text-slate-900 dark:text-slate-100">
                 <span>Total Paid:</span>
-                <span className="text-emerald-600 dark:text-emerald-400">
+                <span className="text-blue-600 dark:text-blue-400">
                   {company.currency || 'KES'} {completedTransaction.total.toLocaleString()}
                 </span>
               </div>
@@ -858,7 +858,7 @@ export const POSManager: React.FC<POSManagerProps> = ({
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 onClick={() => handlePrintReceipt(completedTransaction)}
-                className="py-3 px-4 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold transition-all flex items-center justify-center space-x-2"
+                className="py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all flex items-center justify-center space-x-2"
                 id="pos-print-receipt-btn"
               >
                 <Printer className="w-4 h-4" />

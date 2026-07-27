@@ -153,7 +153,7 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-            <Users className="w-7 h-7 text-teal-500" />
+            <Users className="w-7 h-7 text-blue-500" />
             <span>Customers Directory</span>
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -163,7 +163,7 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
 
         <button
           onClick={handleOpenAddModal}
-          className="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2"
+          className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2"
           id="add-customer-btn"
         >
           <UserPlus className="w-4 h-4" />
@@ -174,7 +174,7 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
       {/* Analytics Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center space-x-3">
-          <div className="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-500">
+          <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500">
             <Users className="w-6 h-6" />
           </div>
           <div>
@@ -184,7 +184,7 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
         </div>
 
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center space-x-3">
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
+          <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500">
             <DollarSign className="w-6 h-6" />
           </div>
           <div>
@@ -239,14 +239,14 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
               <div className="space-y-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-teal-600 to-emerald-500 text-white font-black text-base flex items-center justify-center shadow-sm">
+                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white font-black text-base flex items-center justify-center shadow-sm">
                       {c.name.substring(0, 2).toUpperCase()}
                     </div>
                     <div>
                       <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                         <span>{c.name}</span>
                         {c.isDefault && (
-                          <span className="text-[10px] bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/30 px-2 py-0.5 rounded-full font-bold">
+                          <span className="text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full font-bold">
                             Default
                           </span>
                         )}
@@ -262,7 +262,7 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
                     <div className="flex items-center space-x-1">
                       <button
                         onClick={() => handleOpenEditModal(c)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-teal-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
                         title="Edit Customer"
                         id={`edit-cust-${c.id}`}
                       >
@@ -283,7 +283,7 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
                 {/* Contact info */}
                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 text-xs space-y-1.5 border border-slate-100 dark:border-slate-800">
                   <div className="flex items-center text-slate-600 dark:text-slate-300 gap-2">
-                    <Phone className="w-3.5 h-3.5 text-teal-500" />
+                    <Phone className="w-3.5 h-3.5 text-blue-500" />
                     <span>{c.phone || 'No phone recorded'}</span>
                   </div>
                   <div className="flex items-center text-slate-600 dark:text-slate-300 gap-2">
@@ -299,9 +299,9 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
 
                 {/* Spent statistics */}
                 <div className="grid grid-cols-2 gap-2 text-xs pt-1">
-                  <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-2.5 text-center">
+                  <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-2.5 text-center">
                     <p className="text-[10px] uppercase font-bold text-slate-400">Total Spent</p>
-                    <p className="font-black text-emerald-600 dark:text-emerald-400 mt-0.5 text-sm">
+                    <p className="font-black text-blue-600 dark:text-blue-400 mt-0.5 text-sm">
                       {company.currency || 'KES'} {stats.totalSpent.toLocaleString()}
                     </p>
                   </div>
@@ -317,7 +317,7 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
               {/* View History CTA */}
               <button
                 onClick={() => setHistoryCustomer(c)}
-                className="w-full py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-teal-600 hover:text-white dark:hover:bg-teal-600 font-bold text-xs text-slate-700 dark:text-slate-200 transition-all flex items-center justify-center gap-1.5 shadow-2xs"
+                className="w-full py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 font-bold text-xs text-slate-700 dark:text-slate-200 transition-all flex items-center justify-center gap-1.5 shadow-2xs"
                 id={`history-cust-${c.id}`}
               >
                 <Receipt className="w-3.5 h-3.5" />
@@ -335,7 +335,7 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-teal-500" />
+                <UserPlus className="w-5 h-5 text-blue-500" />
                 <span>{editingCustomer ? 'Edit Customer Info' : 'Register New Client'}</span>
               </h3>
               <button
@@ -357,7 +357,7 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
                   value={formData.name}
                   onChange={(e) => setFormState({ ...formData, name: e.target.value })}
                   placeholder="e.g. Sarah Kimani"
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs rounded-xl px-3.5 py-2.5 font-bold focus:outline-none focus:border-teal-500"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs rounded-xl px-3.5 py-2.5 font-bold focus:outline-none focus:border-blue-500"
                   id="cust-name-input"
                 />
               </div>
@@ -371,7 +371,7 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
                   value={formData.phone}
                   onChange={(e) => setFormState({ ...formData, phone: e.target.value })}
                   placeholder="e.g. 0712 345 678"
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-teal-500"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-blue-500"
                   id="cust-phone-input"
                 />
               </div>
@@ -385,7 +385,7 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
                   value={formData.email}
                   onChange={(e) => setFormState({ ...formData, email: e.target.value })}
                   placeholder="e.g. sarah@example.com"
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-teal-500"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-blue-500"
                   id="cust-email-input"
                 />
               </div>
@@ -399,7 +399,7 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
                   value={formData.notes}
                   onChange={(e) => setFormState({ ...formData, notes: e.target.value })}
                   placeholder="Special preferences, allergies, hair style notes..."
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-teal-500 resize-none"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:border-blue-500 resize-none"
                   id="cust-notes-input"
                 />
               </div>
@@ -414,7 +414,7 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold shadow-md transition-all flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md transition-all flex items-center justify-center gap-1.5"
                   id="save-cust-btn"
                 >
                   <CheckCircle2 className="w-4 h-4" />
@@ -434,13 +434,13 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 flex-shrink-0">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-500 font-bold flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500 font-bold flex items-center justify-center">
                   <Receipt className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <span>{historyCustomer.name}</span>
-                    <span className="text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+                    <span className="text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full font-bold">
                       {historyTxs.length} Purchase(s)
                     </span>
                   </h3>
@@ -485,7 +485,7 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
                       </div>
 
                       <div className="flex items-center space-x-2">
-                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                           {tx.paymentMethod.toUpperCase()}
                         </span>
                         <span className="text-xs font-black text-slate-900 dark:text-white">

@@ -70,14 +70,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
     <div className="space-y-6 animate-fadeIn pb-8">
       
       {/* Banner / Welcome Header (Compact 60% Size) */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-teal-950 rounded-xl p-3.5 sm:p-4 border border-slate-800 text-white shadow-sm relative overflow-hidden">
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-teal-500/10 via-transparent to-transparent pointer-events-none"></div>
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 rounded-xl p-3.5 sm:p-4 border border-slate-800 text-white shadow-sm relative overflow-hidden">
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent pointer-events-none"></div>
         
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 relative z-10">
           <div>
             <div className="flex items-center space-x-2 mb-1">
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-blue-400" />
                 Operational Summary
               </span>
               <span className="text-slate-400 text-[11px] font-mono">{company.currency || 'KES'} Real-time Setup</span>
@@ -93,7 +93,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
             <button
               onClick={() => onNavigateToTab('services')}
-              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-95"
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-95"
               id="dash-manage-services-btn"
             >
               <Sparkles className="w-3.5 h-3.5" />
@@ -107,7 +107,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95"
               id="dash-receipt-btn"
             >
-              <Printer className="w-3.5 h-3.5 text-teal-400" />
+              <Printer className="w-3.5 h-3.5 text-blue-400" />
               <span>Receipt Settings</span>
             </button>
           </div>
@@ -127,7 +127,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Spa Treatments
             </span>
-            <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <Sparkles className="w-5 h-5" />
             </div>
           </div>
@@ -140,7 +140,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 {activeServices.length} Active in catalog
               </p>
             </div>
-            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 rounded-md flex items-center gap-1">
+            <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-1 rounded-md flex items-center gap-1">
               Active <ArrowUpRight className="w-3 h-3" />
             </span>
           </div>
@@ -213,7 +213,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Avg Treatment Price
             </span>
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
               <DollarSign className="w-5 h-5" />
             </div>
           </div>
@@ -226,7 +226,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 Avg Duration: {avgDuration} mins
               </p>
             </div>
-            <span className="text-xs font-medium text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/40 px-2 py-1 rounded-md">
+            <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-1 rounded-md">
               Rate
             </span>
           </div>
@@ -245,7 +245,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-teal-500" />
+                  <Layers className="w-4 h-4 text-blue-500" />
                   Service Breakdown by Category
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -254,7 +254,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
               <button
                 onClick={() => onNavigateToTab('services')}
-                className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:underline flex items-center gap-1"
+                className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
               >
                 Manage Categories <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -298,7 +298,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-emerald-500" />
+                  <Tag className="w-4 h-4 text-blue-500" />
                   Active Treatment Highlights
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -307,7 +307,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
               <button
                 onClick={() => onNavigateToTab('services')}
-                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 px-3 py-1.5 rounded-lg transition-colors"
+                className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 px-3 py-1.5 rounded-lg transition-colors"
               >
                 + Add / Edit Services
               </button>
@@ -329,7 +329,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         >
                           {category?.name || 'General'}
                         </span>
-                        <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                        <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400">
                           {company.currency || 'KES'} {service.price.toLocaleString()}
                         </span>
                       </div>
@@ -346,7 +346,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         <Clock className="w-3 h-3 text-slate-400" />
                         {service.durationMinutes} minutes
                       </span>
-                      <span className={`font-medium ${service.isActive ? 'text-emerald-500' : 'text-slate-400'}`}>
+                      <span className={`font-medium ${service.isActive ? 'text-blue-500' : 'text-slate-400'}`}>
                         {service.isActive ? '● Available' : '○ Inactive'}
                       </span>
                     </div>
@@ -414,7 +414,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors text-left group"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                     <Printer className="w-4 h-4" />
                   </div>
                   <div>
@@ -450,7 +450,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                <ShieldCheck className="w-4 h-4 text-blue-500" />
                 Recent Activity Audit
               </h3>
               <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded font-mono">
@@ -464,7 +464,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   key={log.id} 
                   className="flex items-start space-x-3 text-xs border-b border-slate-100 dark:border-slate-800/60 pb-2.5 last:border-0 last:pb-0"
                 >
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></div>
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-semibold text-slate-800 dark:text-slate-200">

@@ -486,12 +486,12 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
       <div className="bg-slate-900 border border-slate-800 text-white rounded-xl p-3.5 sm:p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
         <div>
           <div className="flex items-center space-x-2 mb-1">
-            <span className="text-[9px] bg-teal-500/10 text-teal-400 border border-teal-500/30 px-2 py-0.2 rounded-full font-bold uppercase tracking-wider">
+            <span className="text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/30 px-2 py-0.2 rounded-full font-bold uppercase tracking-wider">
               Sales Ledger & Audit
             </span>
           </div>
           <h2 className="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
-            <ReceiptText className="w-4 h-4 text-teal-400" />
+            <ReceiptText className="w-4 h-4 text-blue-400" />
             <span>Transactions & Revenue</span>
           </h2>
           <p className="text-slate-300 text-xs mt-0.5 max-w-xl">
@@ -519,7 +519,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
 
           <button
             onClick={handleExportPDFReport}
-            className="flex-1 sm:flex-none px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs transition-all shadow-xs flex items-center justify-center space-x-1.5"
+            className="flex-1 sm:flex-none px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-all shadow-xs flex items-center justify-center space-x-1.5"
             id="transactions-export-pdf-btn"
           >
             <Download className="w-3.5 h-3.5" />
@@ -534,7 +534,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
           <div className="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider">
             <span>Total Sales</span>
-            <DollarSign className="w-4 h-4 text-emerald-500" />
+            <DollarSign className="w-4 h-4 text-blue-500" />
           </div>
           <div className="text-2xl font-black text-slate-900 dark:text-slate-100 font-mono mt-2">
             {currency} {totalRevenue.toLocaleString()}
@@ -545,9 +545,9 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
           <div className="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider">
             <span>M-Pesa Revenue</span>
-            <Smartphone className="w-4 h-4 text-emerald-500" />
+            <Smartphone className="w-4 h-4 text-blue-500" />
           </div>
-          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono mt-2">
+          <div className="text-2xl font-black text-blue-600 dark:text-blue-400 font-mono mt-2">
             {currency} {mpesaRevenue.toLocaleString()}
           </div>
           <span className="text-[11px] text-slate-400 mt-0.5 block">Mobile Money</span>
@@ -589,7 +589,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
               placeholder="Search receipt #, client name, or therapist..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium border border-transparent focus:border-teal-500 focus:outline-none"
+              className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-medium border border-transparent focus:border-blue-500 focus:outline-none"
               id="transactions-search-input"
             />
           </div>
@@ -636,7 +636,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs text-slate-600 dark:text-slate-400">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-bold flex items-center gap-1 text-slate-700 dark:text-slate-300">
-              <Calendar className="w-3.5 h-3.5 text-teal-600" />
+              <Calendar className="w-3.5 h-3.5 text-blue-600" />
               Date Range:
             </span>
 
@@ -671,7 +671,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                   setSelectedEmployeeFilter('all');
                   setSearchQuery('');
                 }}
-                className="text-[11px] text-teal-600 hover:text-teal-700 dark:text-teal-400 font-bold underline px-2"
+                className="text-[11px] text-blue-600 hover:text-blue-700 dark:text-blue-400 font-bold underline px-2"
                 id="transactions-clear-filters-btn"
               >
                 Reset All Filters
@@ -715,7 +715,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                     key={trx.id}
                     className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
                   >
-                    <td className="py-3.5 px-4 font-mono font-bold text-teal-600 dark:text-teal-400">
+                    <td className="py-3.5 px-4 font-mono font-bold text-blue-600 dark:text-blue-400">
                       {trx.receiptNo}
                     </td>
                     <td className="py-3.5 px-4 text-slate-500 whitespace-nowrap">
@@ -739,7 +739,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                       <span
                         className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                           trx.paymentMethod === 'mpesa'
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30'
                             : trx.paymentMethod === 'cash'
                             ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30'
                             : 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/30'
@@ -755,7 +755,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                       <div className="flex items-center justify-center space-x-1 sm:space-x-1.5">
                         <button
                           onClick={() => setViewingTransaction(trx)}
-                          className="px-2 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-teal-500/20 text-slate-600 dark:text-slate-300 hover:text-teal-500 transition-colors flex items-center space-x-1"
+                          className="px-2 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-blue-500/20 text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-colors flex items-center space-x-1"
                           title="View Receipt Details"
                           id={`view-trx-${trx.id}`}
                         >
@@ -773,7 +773,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                         </button>
                         <button
                           onClick={() => handlePrintThermalReceipt(trx)}
-                          className="px-2 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-600 text-emerald-600 dark:text-emerald-400 hover:text-white border border-emerald-200 dark:border-emerald-800 font-bold text-xs transition-colors flex items-center space-x-1"
+                          className="px-2 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-800 font-bold text-xs transition-colors flex items-center space-x-1"
                           title="Reprint Thermal Receipt"
                           id={`reprint-trx-${trx.id}`}
                         >
@@ -814,7 +814,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
             </button>
 
             <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-              <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-500 flex items-center justify-center font-bold">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center font-bold">
                 <ReceiptText className="w-5 h-5" />
               </div>
               <div>
@@ -841,7 +841,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
               )}
               <div className="flex justify-between text-slate-500">
                 <span>Payment Method:</span>
-                <strong className="text-emerald-600 uppercase">{viewingTransaction.paymentMethod}</strong>
+                <strong className="text-blue-600 dark:text-blue-400 uppercase">{viewingTransaction.paymentMethod}</strong>
               </div>
 
               {viewingTransaction.paymentDetails?.mpesaRef && (
@@ -872,7 +872,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                 </div>
                 <div className="flex justify-between text-sm font-bold text-slate-900 dark:text-slate-100 pt-1">
                   <span>Total Paid:</span>
-                  <span className="text-emerald-600 font-mono">{currency} {viewingTransaction.total.toLocaleString()}</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-mono">{currency} {viewingTransaction.total.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -880,7 +880,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
               <button
                 onClick={() => handlePrintThermalReceipt(viewingTransaction)}
-                className="py-2.5 px-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold transition-all flex items-center justify-center space-x-1.5"
+                className="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all flex items-center justify-center space-x-1.5"
                 id="modal-print-single-trx-btn"
               >
                 <Printer className="w-3.5 h-3.5" />
@@ -1191,7 +1191,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                   <button
                     type="button"
                     onClick={handleAddItem}
-                    className="px-2 py-1 bg-teal-500/10 hover:bg-teal-500/20 text-teal-600 dark:text-teal-400 rounded-lg text-xs font-bold transition-all flex items-center space-x-1"
+                    className="px-2 py-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold transition-all flex items-center space-x-1"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Item</span>
@@ -1256,7 +1256,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
 
                 <div className="bg-slate-100 dark:bg-slate-800/80 p-3 rounded-xl flex items-center justify-between font-mono font-bold text-xs text-slate-800 dark:text-slate-200">
                   <span>Calculated Total:</span>
-                  <span className="text-base text-emerald-600 dark:text-emerald-400">
+                  <span className="text-base text-blue-600 dark:text-blue-400">
                     {currency} {Math.max(0, editForm.items.reduce((a, b) => a + (b.price * b.quantity), 0) - editForm.discountAmount).toLocaleString()}
                   </span>
                 </div>

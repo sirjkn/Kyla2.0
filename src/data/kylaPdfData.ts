@@ -60,7 +60,7 @@ export const KYLA_STAFF: Staff[] = [
     email: 'victor.inzilani@kylabarber.co.ke',
     specializations: ['cat-barber', 'cat-chemical'],
     status: 'active',
-    avatarColor: 'bg-emerald-600',
+    avatarColor: 'bg-blue-600',
     createdAt: '2026-02-01T00:00:00.000Z',
   },
   {

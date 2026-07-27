@@ -53,8 +53,8 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
       title: 'Transactions & Audit Ledger',
       subtitle: 'Detailed revenue tracking, payment logs, and daily closeout reporting.',
       icon: ReceiptText,
-      color: 'from-teal-500 to-emerald-600',
-      badgeBg: 'bg-teal-500/10 text-teal-500 border-teal-500/30',
+      color: 'from-blue-500 to-indigo-600',
+      badgeBg: 'bg-blue-500/10 text-blue-500 border-blue-500/30',
       features: [
         'Filter transactions by staff therapist, payment method & date',
         'Export daily closing reports to Excel / PDF / CSV',
@@ -118,7 +118,7 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
           <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 w-full md:w-auto flex-shrink-0">
             <button
               onClick={onNavigateToServices}
-              className="w-full px-5 py-3 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2 active:scale-95"
+              className="w-full px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2 active:scale-95"
             >
               <Sparkles className="w-4 h-4" />
               <span>Manage Services Catalog</span>
@@ -141,7 +141,7 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
         <div className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-5">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+              <CheckCircle2 className="w-5 h-5 text-blue-500" />
               Planned Capabilities
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -152,7 +152,7 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
           <ul className="space-y-3 text-xs text-slate-700 dark:text-slate-300">
             {meta.features.map((feat, idx) => (
               <li key={idx} className="flex items-start space-x-2.5 bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
-                <span className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold font-mono text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="w-5 h-5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold font-mono text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">
                   {idx + 1}
                 </span>
                 <span className="leading-relaxed font-medium">{feat}</span>
@@ -165,7 +165,7 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
               onClick={() => setNotifySubscribed(!notifySubscribed)}
               className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                 notifySubscribed
-                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                  ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30'
                   : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200'
               }`}
             >
@@ -195,7 +195,7 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
                 <div className="space-y-3 text-xs">
                   <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                     <span className="text-slate-400 font-mono">Cart (#POS-9041)</span>
-                    <span className="text-emerald-400 font-bold">Client: Walk-in Guest</span>
+                    <span className="text-blue-400 font-bold">Client: Walk-in Guest</span>
                   </div>
                   <div className="space-y-2">
                     {services.slice(0, 2).map((srv) => (
@@ -204,7 +204,7 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
                           <div className="font-semibold text-white">{srv.name}</div>
                           <div className="text-[10px] text-slate-400">{srv.durationMinutes} mins • Therapist: Sarah J.</div>
                         </div>
-                        <div className="font-mono font-bold text-emerald-400">
+                        <div className="font-mono font-bold text-blue-400">
                           {company.currency || 'KES'} {srv.price.toLocaleString()}
                         </div>
                       </div>
@@ -212,15 +212,15 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
                   </div>
                   <div className="pt-2 border-t border-slate-800 flex justify-between font-bold text-white text-sm">
                     <span>Subtotal:</span>
-                    <span className="font-mono text-emerald-400">
+                    <span className="font-mono text-blue-400">
                       {company.currency || 'KES'} {(services.slice(0,2).reduce((a,b)=>a+b.price,0)).toLocaleString()}
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 pt-2">
-                    <div className="bg-emerald-600/20 text-emerald-300 text-center py-2 rounded-lg text-[11px] font-bold border border-emerald-500/30">
+                    <div className="bg-blue-600/20 text-blue-300 text-center py-2 rounded-lg text-[11px] font-bold border border-blue-500/30">
                       Pay Cash
                     </div>
-                    <div className="bg-teal-600/20 text-teal-300 text-center py-2 rounded-lg text-[11px] font-bold border border-teal-500/30">
+                    <div className="bg-indigo-600/20 text-indigo-300 text-center py-2 rounded-lg text-[11px] font-bold border border-indigo-500/30">
                       Pay M-Pesa / Card
                     </div>
                   </div>
@@ -235,19 +235,19 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
                     <span>Total</span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-800/50">
-                    <span className="font-mono text-teal-400">#REC-8801</span>
+                    <span className="font-mono text-blue-400">#REC-8801</span>
                     <span className="text-slate-200">Deep Tissue Massage</span>
-                    <span className="font-mono text-emerald-400">KES 4,500</span>
+                    <span className="font-mono text-blue-400">KES 4,500</span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-800/50">
-                    <span className="font-mono text-teal-400">#REC-8802</span>
+                    <span className="font-mono text-blue-400">#REC-8802</span>
                     <span className="text-slate-200">Botanical Facial</span>
-                    <span className="font-mono text-emerald-400">KES 3,500</span>
+                    <span className="font-mono text-blue-400">KES 3,500</span>
                   </div>
                   <div className="flex justify-between py-1">
-                    <span className="font-mono text-teal-400">#REC-8803</span>
+                    <span className="font-mono text-blue-400">#REC-8803</span>
                     <span className="text-slate-200">Spa Pedicure</span>
-                    <span className="font-mono text-emerald-400">KES 2,500</span>
+                    <span className="font-mono text-blue-400">KES 2,500</span>
                   </div>
                 </div>
               )}
@@ -275,7 +275,7 @@ export const ComingSoonView: React.FC<ComingSoonViewProps> = ({
 
           <div className="pt-4 text-center">
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Need assistance setting up current features? Head over to <strong className="text-teal-600 dark:text-teal-400">Services</strong> or <strong className="text-teal-600 dark:text-teal-400">Settings</strong>.
+              Need assistance setting up current features? Head over to <strong className="text-blue-600 dark:text-blue-400">Services</strong> or <strong className="text-blue-600 dark:text-blue-400">Settings</strong>.
             </p>
           </div>
         </div>
