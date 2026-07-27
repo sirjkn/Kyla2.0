@@ -31,6 +31,7 @@ interface TransactionsManagerProps {
   company: CompanyDetails;
   receiptSettings: ReceiptSettings;
   paymentMethods?: PaymentMethodConfig[];
+  currentUser?: { id: string; name: string; role: string } | null;
   onNavigateToPOS?: () => void;
   onUpdateTransactionStatus?: (id: string, status: 'completed' | 'refunded' | 'cancelled') => void;
   onEditTransaction?: (updatedTx: Transaction) => void;
@@ -44,12 +45,17 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
   company,
   receiptSettings,
   paymentMethods = [],
+  currentUser,
   onNavigateToPOS,
   onUpdateTransactionStatus,
   onEditTransaction,
   onDeleteTransaction,
   onDeleteAllTransactions,
 }) => {
+  const isAdmin = 
+    currentUser?.role?.toLowerCase().includes('admin') || 
+    currentUser?.role?.toLowerCase().includes('owner') || 
+    currentUser?.id === 'admin-owner';
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPaymentFilter, setSelectedPaymentFilter] = useState<string>('all');
   const [selectedEmployeeFilter, setSelectedEmployeeFilter] = useState<string>('all');
@@ -135,6 +141,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
 
   // Start Edit Transaction
   const handleStartEdit = (trx: Transaction) => {
+    if (!isAdmin) return;
     setEditingTransaction(trx);
     setEditForm({
       customerName: trx.customerName || '',
@@ -149,7 +156,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
 
   // Save Edit Transaction
   const handleSaveEdit = () => {
-    if (!editingTransaction) return;
+    if (!isAdmin || !editingTransaction) return;
 
     const subtotal = editForm.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     const total = Math.max(0, subtotal - editForm.discountAmount);
@@ -501,7 +508,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
 
         {/* Action Export & Delete Buttons */}
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          {transactions.length > 0 && onDeleteAllTransactions && (
+          {isAdmin && transactions.length > 0 && onDeleteAllTransactions && (
             <button
               onClick={() => {
                 setDeleteAllPassword('');
@@ -536,7 +543,10 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
             <span>Total Sales</span>
             <DollarSign className="w-4 h-4 text-blue-500" />
           </div>
-          <div className="text-2xl font-black text-slate-900 dark:text-slate-100 font-mono mt-2">
+          <div 
+            className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 mt-2"
+            style={{ fontFamily: "'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', sans-serif" }}
+          >
             {currency} {totalRevenue.toLocaleString()}
           </div>
           <span className="text-[11px] text-slate-400 mt-0.5 block">{totalCount} total receipts</span>
@@ -547,7 +557,10 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
             <span>M-Pesa Revenue</span>
             <Smartphone className="w-4 h-4 text-blue-500" />
           </div>
-          <div className="text-2xl font-black text-blue-600 dark:text-blue-400 font-mono mt-2">
+          <div 
+            className="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400 mt-2"
+            style={{ fontFamily: "'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', sans-serif" }}
+          >
             {currency} {mpesaRevenue.toLocaleString()}
           </div>
           <span className="text-[11px] text-slate-400 mt-0.5 block">Mobile Money</span>
@@ -558,7 +571,10 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
             <span>Cash Revenue</span>
             <Banknote className="w-4 h-4 text-amber-500" />
           </div>
-          <div className="text-2xl font-black text-amber-600 dark:text-amber-400 font-mono mt-2">
+          <div 
+            className="text-lg sm:text-xl font-bold text-amber-600 dark:text-amber-400 mt-2"
+            style={{ fontFamily: "'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', sans-serif" }}
+          >
             {currency} {cashRevenue.toLocaleString()}
           </div>
           <span className="text-[11px] text-slate-400 mt-0.5 block">Register Cash</span>
@@ -569,7 +585,10 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
             <span>Card Revenue</span>
             <CreditCard className="w-4 h-4 text-purple-500" />
           </div>
-          <div className="text-2xl font-black text-purple-600 dark:text-purple-400 font-mono mt-2">
+          <div 
+            className="text-lg sm:text-xl font-bold text-purple-600 dark:text-purple-400 mt-2"
+            style={{ fontFamily: "'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', sans-serif" }}
+          >
             {currency} {cardRevenue.toLocaleString()}
           </div>
           <span className="text-[11px] text-slate-400 mt-0.5 block">PDQ / Terminal</span>
@@ -762,15 +781,17 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                           <Eye className="w-3.5 h-3.5" />
                           <span>View</span>
                         </button>
-                        <button
-                          onClick={() => handleStartEdit(trx)}
-                          className="px-2 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-800 font-bold text-xs transition-colors flex items-center space-x-1"
-                          title="Edit Transaction"
-                          id={`edit-trx-${trx.id}`}
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                          <span>Edit</span>
-                        </button>
+                        {isAdmin && (
+                          <button
+                            onClick={() => handleStartEdit(trx)}
+                            className="px-2 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-800 font-bold text-xs transition-colors flex items-center space-x-1"
+                            title="Edit Transaction"
+                            id={`edit-trx-${trx.id}`}
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                            <span>Edit</span>
+                          </button>
+                        )}
                         <button
                           onClick={() => handlePrintThermalReceipt(trx)}
                           className="px-2 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-800 font-bold text-xs transition-colors flex items-center space-x-1"
@@ -780,7 +801,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                           <Printer className="w-3.5 h-3.5" />
                           <span>Reprint</span>
                         </button>
-                        {onDeleteTransaction && (
+                        {isAdmin && onDeleteTransaction && (
                           <button
                             onClick={() => setDeletingTrx(trx)}
                             className="px-2 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-600 text-rose-600 dark:text-rose-400 hover:text-white border border-rose-200 dark:border-rose-800 font-bold text-xs transition-colors flex items-center space-x-1"
@@ -887,20 +908,22 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                 <span>Reprint</span>
               </button>
 
-              <button
-                onClick={() => {
-                  const target = viewingTransaction;
-                  setViewingTransaction(null);
-                  handleStartEdit(target);
-                }}
-                className="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all flex items-center justify-center space-x-1.5"
-                id="modal-edit-single-trx-btn"
-              >
-                <Pencil className="w-3.5 h-3.5" />
-                <span>Edit</span>
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => {
+                    const target = viewingTransaction;
+                    setViewingTransaction(null);
+                    handleStartEdit(target);
+                  }}
+                  className="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all flex items-center justify-center space-x-1.5"
+                  id="modal-edit-single-trx-btn"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span>Edit</span>
+                </button>
+              )}
 
-              {onDeleteTransaction && (
+              {isAdmin && onDeleteTransaction && (
                 <button
                   onClick={() => {
                     const target = viewingTransaction;
@@ -966,7 +989,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
               </button>
               <button
                 onClick={() => {
-                  if (onDeleteTransaction && deletingTrx) {
+                  if (isAdmin && onDeleteTransaction && deletingTrx) {
                     onDeleteTransaction(deletingTrx.id);
                   }
                   setDeletingTrx(null);
@@ -1022,7 +1045,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
               </label>
               <input
                 type="password"
-                placeholder="Type password 'cat' to confirm"
+                placeholder="Enter deletion password to confirm"
                 value={deleteAllPassword}
                 onChange={(e) => {
                   setDeleteAllPassword(e.target.value);
@@ -1052,7 +1075,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
               <button
                 onClick={() => {
                   if (deleteAllPassword.trim().toLowerCase() !== 'cat') {
-                    setDeleteAllError('Incorrect password! Enter "cat" to confirm.');
+                    setDeleteAllError('Incorrect deletion password.');
                     return;
                   }
                   if (onDeleteAllTransactions) {
@@ -1062,7 +1085,7 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
                   setDeleteAllPassword('');
                   setDeleteAllError('');
                 }}
-                disabled={deleteAllPassword.trim().toLowerCase() !== 'cat'}
+                disabled={!deleteAllPassword.trim()}
                 className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-bold text-xs transition-colors shadow-md flex items-center space-x-1.5"
                 id="confirm-delete-all-trx-btn"
               >

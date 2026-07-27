@@ -8,7 +8,8 @@ import {
   EyeOff, 
   LogIn, 
   ShieldCheck,
-  Check
+  Check,
+  Search
 } from 'lucide-react';
 
 interface LoginPageProps {
@@ -63,10 +64,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
   const allUsers = [adminUser, ...staffUsers];
 
+  const [userSearchQuery, setUserSearchQuery] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string>(allUsers[0].id);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  const filteredUsers = allUsers.filter((u) =>
+    u.name.toLowerCase().includes(userSearchQuery.trim().toLowerCase()) ||
+    u.role.toLowerCase().includes(userSearchQuery.trim().toLowerCase())
+  );
 
   const selectedUser = allUsers.find((u) => u.id === selectedUserId) || allUsers[0];
 
@@ -122,35 +129,63 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 <span>Select Account</span>
               </label>
               <span className="text-[10px] text-slate-400 font-medium">
-                Scroll to view all
+                {filteredUsers.length} account{filteredUsers.length !== 1 ? 's' : ''}
               </span>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Type to search username..."
+                value={userSearchQuery}
+                onChange={(e) => setUserSearchQuery(e.target.value)}
+                className="w-full pl-8 pr-7 py-1.5 text-xs font-semibold rounded-lg bg-slate-50 border border-slate-200 focus:outline-none focus:border-blue-600 focus:bg-white text-slate-800 placeholder-slate-400 transition-colors"
+                id="login-username-search-input"
+              />
+              {userSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setUserSearchQuery('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold p-0.5"
+                >
+                  ×
+                </button>
+              )}
             </div>
 
             <div 
               className="max-h-36 sm:max-h-40 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-1.5 space-y-1 shadow-inner"
               id="login-username-scroll-list"
             >
-              {allUsers.map((u) => {
-                const isSelected = u.id === selectedUserId;
-                return (
-                  <button
-                    key={u.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedUserId(u.id);
-                      setErrorMsg('');
-                    }}
-                    className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-all ${
-                      isSelected
-                        ? 'bg-blue-600 text-white shadow-xs'
-                        : 'text-slate-700 hover:bg-slate-200/80 hover:text-slate-900 bg-white border border-slate-100'
-                    }`}
-                  >
-                    <span className="truncate">{u.name}</span>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-white shrink-0 ml-1" />}
-                  </button>
-                );
-              })}
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map((u) => {
+                  const isSelected = u.id === selectedUserId;
+                  return (
+                    <button
+                      key={u.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedUserId(u.id);
+                        setErrorMsg('');
+                      }}
+                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-all ${
+                        isSelected
+                          ? 'bg-blue-600 text-white shadow-xs'
+                          : 'text-slate-700 hover:bg-slate-200/80 hover:text-slate-900 bg-white border border-slate-100'
+                      }`}
+                    >
+                      <span className="truncate">{u.name}</span>
+                      {isSelected && <Check className="w-3.5 h-3.5 text-white shrink-0 ml-1" />}
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="py-3 text-center text-xs text-slate-400 font-medium">
+                  No accounts found matching "{userSearchQuery}"
+                </div>
+              )}
             </div>
           </div>
 

@@ -547,6 +547,7 @@ export default function App() {
               company={company}
               receiptSettings={receiptSettings}
               paymentMethods={paymentMethods}
+              currentUser={currentUser}
               onNavigateToPOS={() => setActiveTab('pos')}
               onEditTransaction={handleEditTransaction}
               onDeleteTransaction={handleDeleteTransaction}
