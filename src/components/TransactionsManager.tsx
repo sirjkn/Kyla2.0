@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { Transaction, CompanyDetails, ReceiptSettings, PaymentMethodConfig, Staff } from '../types';
 import { 
   Search, 
@@ -245,11 +247,9 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
     setEditForm({ ...editForm, items: updated });
   };
 
-  // Generate & Export Sales PDF / Printable Report
+  // Generate & Download Sales PDF File Directly (Without opening printer prompt)
   const handleExportPDFReport = () => {
-    const reportWindow = window.open('', '_blank');
-    if (!reportWindow) return;
-
+    const doc = new jsPDF();
     const reportDate = new Date().toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -257,183 +257,93 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
       day: 'numeric',
     });
 
-    reportWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Sales Audit Report - ${company.businessName}</title>
-          <style>
-            body {
-              font-family: 'Helvetica Neue', Arial, sans-serif;
-              padding: 40px;
-              color: #1e293b;
-              font-size: 12px;
-              line-height: 1.5;
-            }
-            .header {
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-              border-bottom: 2px solid #0d9488;
-              padding-bottom: 15px;
-              margin-bottom: 20px;
-            }
-            .company-title {
-              font-size: 22px;
-              font-weight: bold;
-              color: #0f172a;
-            }
-            .report-title {
-              font-size: 16px;
-              font-weight: bold;
-              color: #0d9488;
-              text-align: right;
-            }
-            .stats-grid {
-              display: grid;
-              grid-template-columns: repeat(4, 1fr);
-              gap: 12px;
-              margin-bottom: 25px;
-            }
-            .stat-card {
-              background: #f8fafc;
-              border: 1px solid #e2e8f0;
-              padding: 12px;
-              border-radius: 8px;
-            }
-            .stat-label {
-              font-size: 10px;
-              color: #64748b;
-              text-transform: uppercase;
-              font-weight: bold;
-            }
-            .stat-value {
-              font-size: 16px;
-              font-weight: bold;
-              color: #0f172a;
-              margin-top: 4px;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-top: 15px;
-            }
-            th, td {
-              padding: 10px 12px;
-              text-align: left;
-              border-bottom: 1px solid #e2e8f0;
-            }
-            th {
-              background-color: #f1f5f9;
-              font-weight: bold;
-              color: #334155;
-              text-transform: uppercase;
-              font-size: 10px;
-            }
-            .text-right { text-align: right; }
-            .font-mono { font-family: monospace; }
-            .badge {
-              padding: 3px 8px;
-              border-radius: 4px;
-              font-size: 10px;
-              font-weight: bold;
-              text-transform: uppercase;
-            }
-            .badge-mpesa { background: #dcfce7; color: #166534; }
-            .badge-cash { background: #fef3c7; color: #92400e; }
-            .badge-card { background: #f3e8ff; color: #6b21a8; }
-            .footer {
-              margin-top: 40px;
-              text-align: center;
-              font-size: 10px;
-              color: #94a3b8;
-              border-top: 1px solid #e2e8f0;
-              padding-top: 15px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div>
-              <div class="company-title">${company.businessName}</div>
-              <div>${company.address || ''}</div>
-              <div>Phone: ${company.phone || 'N/A'} | Email: ${company.email || 'N/A'}</div>
-            </div>
-            <div>
-              <div class="report-title">SALES & AUDIT REPORT</div>
-              <div style="color: #64748b;">Generated: ${reportDate}</div>
-            </div>
-          </div>
+    // Company Header
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42); // slate-900
+    doc.text(company.businessName || 'Spa Business', 14, 20);
 
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-label">Total Revenue</div>
-              <div class="stat-value">${currency} ${totalRevenue.toLocaleString()}</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">Total Transactions</div>
-              <div class="stat-value">${totalCount}</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">M-Pesa Revenue</div>
-              <div class="stat-value">${currency} ${mpesaRevenue.toLocaleString()}</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">Cash Revenue</div>
-              <div class="stat-value">${currency} ${cashRevenue.toLocaleString()}</div>
-            </div>
-          </div>
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 116, 139); // slate-500
+    doc.text(`${company.address || ''}`, 14, 26);
+    doc.text(`Phone: ${company.phone || 'N/A'} | Email: ${company.email || 'N/A'}`, 14, 31);
 
-          <h3>Transaction Ledger (${filteredTransactions.length} records)</h3>
+    // Title & Date on Right
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(13, 148, 136); // teal-600
+    doc.text('SALES & AUDIT REPORT', 196, 20, { align: 'right' });
 
-          <table>
-            <thead>
-              <tr>
-                <th>Receipt #</th>
-                <th>Date & Time</th>
-                <th>Therapist</th>
-                <th>Items</th>
-                <th>Method</th>
-                <th class="text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${filteredTransactions
-                .map(
-                  (t) => `
-                <tr>
-                  <td class="font-mono" style="font-weight:bold;">${t.receiptNo}</td>
-                  <td>${new Date(t.createdAt).toLocaleString()}</td>
-                  <td>${t.staffName || 'N/A'}</td>
-                  <td>${t.items.map((i) => i.serviceName).join(', ')}</td>
-                  <td>
-                    <span class="badge badge-${t.paymentMethod}">
-                      ${t.paymentMethod}
-                    </span>
-                  </td>
-                  <td class="text-right font-mono" style="font-weight:bold;">
-                    ${currency} ${t.total.toLocaleString()}
-                  </td>
-                </tr>
-              `
-                )
-                .join('')}
-            </tbody>
-          </table>
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Generated: ${reportDate}`, 196, 26, { align: 'right' });
 
-          <div class="footer">
-            SpaFlow Spa OS — Certified Sales & Audit Ledger
-          </div>
+    // Teal Divider Line
+    doc.setDrawColor(13, 148, 136);
+    doc.setLineWidth(0.8);
+    doc.line(14, 36, 196, 36);
 
-          <script>
-            window.onload = function() {
-              window.print();
-            }
-          </script>
-        </body>
-      </html>
-    `);
-    reportWindow.document.close();
+    // Key Stats Background Box
+    doc.setFillColor(248, 250, 252); // slate-50
+    doc.setDrawColor(226, 232, 240); // slate-200
+    doc.roundedRect(14, 40, 182, 22, 2, 2, 'FD');
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(100, 116, 139);
+    doc.text('TOTAL REVENUE', 18, 47);
+    doc.text('TOTAL TRANSACTIONS', 65, 47);
+    doc.text('M-PESA REVENUE', 112, 47);
+    doc.text('CASH REVENUE', 155, 47);
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text(`${currency} ${totalRevenue.toLocaleString()}`, 18, 56);
+    doc.text(`${totalCount}`, 65, 56);
+    doc.text(`${currency} ${mpesaRevenue.toLocaleString()}`, 112, 56);
+    doc.text(`${currency} ${cashRevenue.toLocaleString()}`, 155, 56);
+
+    // Table of Transactions
+    const tableData = filteredTransactions.map((t) => [
+      t.receiptNo,
+      new Date(t.createdAt).toLocaleString(),
+      t.staffName || 'N/A',
+      t.items.map((i) => i.serviceName).join(', '),
+      (t.paymentMethod || 'cash').toUpperCase(),
+      `${currency} ${t.total.toLocaleString()}`,
+    ]);
+
+    autoTable(doc, {
+      startY: 68,
+      head: [['Receipt #', 'Date & Time', 'Therapist', 'Items Purchased', 'Method', 'Total Amount']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: {
+        fillColor: [15, 23, 42],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 8.5,
+      },
+      bodyStyles: {
+        fontSize: 8,
+        textColor: [30, 41, 59],
+      },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 26 },
+        1: { cellWidth: 36 },
+        2: { cellWidth: 30 },
+        3: { cellWidth: 46 },
+        4: { fontStyle: 'bold', cellWidth: 20 },
+        5: { fontStyle: 'bold', halign: 'right', cellWidth: 24 },
+      },
+      margin: { left: 14, right: 14 },
+    });
+
+    const fileName = `Sales_Audit_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(fileName);
   };
 
   // CSV Export helper

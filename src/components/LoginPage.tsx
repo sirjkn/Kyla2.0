@@ -9,7 +9,9 @@ import {
   LogIn, 
   ShieldCheck,
   Check,
-  Search
+  Search,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 import { getUserPasswords, saveUserPassword } from '../lib/storage';
@@ -70,6 +72,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string>(allUsers[0].id);
+  const [isUserListExpanded, setIsUserListExpanded] = useState(false);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -125,77 +128,111 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           
-          {/* Scrollable Compact User Selection List */}
+          {/* Select Account Field (Open Unexpanded by default) */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5 text-blue-600" />
                 <span>Select Account</span>
               </label>
-              <span className="text-[10px] text-slate-400 font-medium">
-                {filteredUsers.length} account{filteredUsers.length !== 1 ? 's' : ''}
-              </span>
+              <button
+                type="button"
+                onClick={() => setIsUserListExpanded(!isUserListExpanded)}
+                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                id="login-toggle-user-list-btn"
+              >
+                <span>{isUserListExpanded ? 'Collapse List' : 'Browse All'}</span>
+                {isUserListExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
             </div>
 
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Type to search username..."
-                value={userSearchQuery}
-                onChange={(e) => setUserSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-7 py-1.5 text-xs font-semibold rounded-lg bg-slate-50 border border-slate-200 focus:outline-none focus:border-blue-600 focus:bg-white text-slate-800 placeholder-slate-400 transition-colors"
-                id="login-username-search-input"
-              />
-              {userSearchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setUserSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold p-0.5"
+            {/* Standard Dropdown / Unexpanded Trigger Card */}
+            {!isUserListExpanded ? (
+              <div className="relative">
+                <select
+                  value={selectedUserId}
+                  onChange={(e) => {
+                    setSelectedUserId(e.target.value);
+                    setErrorMsg('');
+                  }}
+                  className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-bold appearance-none focus:outline-none focus:border-blue-600 focus:bg-white transition-colors cursor-pointer"
+                  id="login-username-select"
                 >
-                  ×
-                </button>
-              )}
-            </div>
-
-            <div 
-              className="max-h-64 sm:max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-1.5 space-y-1 shadow-inner"
-              id="login-username-scroll-list"
-            >
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((u) => {
-                  const isSelected = u.id === selectedUserId;
-                  return (
-                    <button
-                      key={u.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedUserId(u.id);
-                        setErrorMsg('');
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all ${
-                        isSelected
-                          ? 'bg-blue-600 text-white shadow-xs'
-                          : 'text-slate-700 hover:bg-slate-200/80 hover:text-slate-900 bg-white border border-slate-100'
-                      }`}
-                    >
-                      <div className="flex flex-col min-w-0 pr-2">
-                        <span className="truncate font-bold text-xs">{u.name}</span>
-                        <span className={`text-[10px] truncate ${isSelected ? 'text-blue-100' : 'text-slate-400'}`}>
-                          {u.role}
-                        </span>
-                      </div>
-                      {isSelected && <Check className="w-4 h-4 text-white shrink-0 ml-1" />}
-                    </button>
-                  );
-                })
-              ) : (
-                <div className="py-3 text-center text-xs text-slate-400 font-medium">
-                  No accounts found matching "{userSearchQuery}"
+                  {allUsers.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name} — ({u.role})
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                  <ChevronDown className="w-4 h-4" />
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              /* Expanded Searchable Account Picker */
+              <div className="space-y-1.5 bg-slate-50 border border-slate-200 rounded-2xl p-2.5 shadow-inner animate-fadeIn">
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Type to search username..."
+                    value={userSearchQuery}
+                    onChange={(e) => setUserSearchQuery(e.target.value)}
+                    className="w-full pl-8 pr-7 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 focus:outline-none focus:border-blue-600 text-slate-800 placeholder-slate-400 transition-colors"
+                    id="login-username-search-input"
+                    autoFocus
+                  />
+                  {userSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setUserSearchQuery('')}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold p-0.5"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+
+                <div 
+                  className="max-h-52 overflow-y-auto rounded-xl bg-white border border-slate-200 p-1 space-y-1"
+                  id="login-username-scroll-list"
+                >
+                  {filteredUsers.length > 0 ? (
+                    filteredUsers.map((u) => {
+                      const isSelected = u.id === selectedUserId;
+                      return (
+                        <button
+                          key={u.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedUserId(u.id);
+                            setIsUserListExpanded(false);
+                            setErrorMsg('');
+                          }}
+                          className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all ${
+                            isSelected
+                              ? 'bg-blue-600 text-white shadow-xs'
+                              : 'text-slate-700 hover:bg-slate-100 bg-white border border-slate-100'
+                          }`}
+                        >
+                          <div className="flex flex-col min-w-0 pr-2">
+                            <span className="truncate font-bold text-xs">{u.name}</span>
+                            <span className={`text-[10px] truncate ${isSelected ? 'text-blue-100' : 'text-slate-400'}`}>
+                              {u.role}
+                            </span>
+                          </div>
+                          {isSelected && <Check className="w-4 h-4 text-white shrink-0 ml-1" />}
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <div className="py-3 text-center text-xs text-slate-400 font-medium">
+                      No accounts found matching "{userSearchQuery}"
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Password Input */}
