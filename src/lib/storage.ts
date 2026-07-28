@@ -51,23 +51,27 @@ export interface SupabaseConfig {
 let cachedSupabaseClient: SupabaseClient | null = null;
 let cachedSupabaseConfig: SupabaseConfig | null = null;
 
+const DEFAULT_SUPABASE_URL = 'https://svangvtsfvgmoqnvpjef.supabase.co';
+const DEFAULT_SUPABASE_KEY = 'sb_publishable_TG0pN-aUORwgdfXFe-dDeQ_4RGQm8Gg';
+const DEFAULT_SUPABASE_TABLE = 'new_spa';
+
 export function getSupabaseConfig(): SupabaseConfig {
   try {
-    const url = localStorage.getItem('spaflow_supabase_url') || (import.meta as any).env?.VITE_SUPABASE_URL || '';
-    const key = localStorage.getItem('spaflow_supabase_key') || (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || '';
-    const tableName = localStorage.getItem('spaflow_supabase_table') || 'spaflow_store';
-    return { url: url.trim(), key: key.trim(), tableName: tableName.trim() || 'spaflow_store' };
+    const url = localStorage.getItem('spaflow_supabase_url') || (import.meta as any).env?.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+    const key = localStorage.getItem('spaflow_supabase_key') || (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_KEY;
+    const tableName = localStorage.getItem('spaflow_supabase_table') || DEFAULT_SUPABASE_TABLE;
+    return { url: url.trim(), key: key.trim(), tableName: tableName.trim() || DEFAULT_SUPABASE_TABLE };
   } catch {
-    return { url: '', key: '', tableName: 'spaflow_store' };
+    return { url: DEFAULT_SUPABASE_URL, key: DEFAULT_SUPABASE_KEY, tableName: DEFAULT_SUPABASE_TABLE };
   }
 }
 
-export function setSupabaseConfig(url: string, key: string, tableName = 'spaflow_store') {
+export function setSupabaseConfig(url: string, key: string, tableName = DEFAULT_SUPABASE_TABLE) {
   try {
     if (url.trim() && key.trim()) {
       localStorage.setItem('spaflow_supabase_url', url.trim());
       localStorage.setItem('spaflow_supabase_key', key.trim());
-      localStorage.setItem('spaflow_supabase_table', tableName.trim() || 'spaflow_store');
+      localStorage.setItem('spaflow_supabase_table', tableName.trim() || DEFAULT_SUPABASE_TABLE);
     } else {
       localStorage.removeItem('spaflow_supabase_url');
       localStorage.removeItem('spaflow_supabase_key');

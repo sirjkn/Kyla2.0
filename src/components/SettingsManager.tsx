@@ -188,12 +188,12 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   };
 
   const handleDisconnectSupabase = () => {
-    setSupabaseConfig('', '', 'spaflow_store');
-    setSbUrl('');
-    setSbKey('');
-    setSbTable('spaflow_store');
+    setSupabaseConfig('', '', '');
+    setSbUrl('https://svangvtsfvgmoqnvpjef.supabase.co');
+    setSbKey('sb_publishable_TG0pN-aUORwgdfXFe-dDeQ_4RGQm8Gg');
+    setSbTable('new_spa');
     setSbTestResult(null);
-    setSbSavedMsg('Supabase connection cleared.');
+    setSbSavedMsg('Reset to system default Supabase database (new_spa).');
     setTimeout(() => setSbSavedMsg(''), 3000);
     handleForceCloudSync();
   };
@@ -1758,19 +1758,19 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
               <div className="p-4 rounded-2xl bg-slate-950 text-slate-100 border border-slate-800 text-xs font-mono space-y-2 animate-fadeIn">
                 <div className="flex items-center justify-between text-slate-400 font-sans text-[11px] font-bold border-b border-slate-800 pb-2">
                   <span>Supabase SQL Editor Script (Copy & Run in Supabase)</span>
-                  <span className="text-emerald-400">Creates table `{sbTable || 'spaflow_store'}`</span>
+                  <span className="text-emerald-400">Creates table `{sbTable || 'new_spa'}`</span>
                 </div>
                 <pre className="overflow-x-auto text-emerald-300 p-2 bg-slate-900 rounded-xl leading-relaxed text-[11px]">
 {`-- 1. Create key-value state table
-create table if not exists ${sbTable || 'spaflow_store'} (
+create table if not exists ${sbTable || 'new_spa'} (
   key text primary key,
   data jsonb not null,
   updated_at timestamp with time zone default timezone('utc'::text, now())
 );
 
 -- 2. Enable Row Level Security and create public policy
-alter table ${sbTable || 'spaflow_store'} enable row level security;
-create policy "Allow public access" on ${sbTable || 'spaflow_store'} for all using (true) with check (true);`}
+alter table ${sbTable || 'new_spa'} enable row level security;
+create policy "Allow public access" on ${sbTable || 'new_spa'} for all using (true) with check (true);`}
                 </pre>
               </div>
             )}
@@ -1782,7 +1782,7 @@ create policy "Allow public access" on ${sbTable || 'spaflow_store'} for all usi
                 </label>
                 <input
                   type="text"
-                  placeholder="https://xyzcompany.supabase.co"
+                  placeholder="https://svangvtsfvgmoqnvpjef.supabase.co"
                   value={sbUrl}
                   onChange={(e) => setSbUrl(e.target.value)}
                   className="w-full px-4 py-2.5 text-xs font-semibold rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-emerald-500 text-slate-900 dark:text-slate-100 font-mono"
@@ -1795,7 +1795,7 @@ create policy "Allow public access" on ${sbTable || 'spaflow_store'} for all usi
                 </label>
                 <input
                   type="password"
-                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  placeholder="sb_publishable_TG0pN-aUORwgdfXFe-dDeQ_4RGQm8Gg"
                   value={sbKey}
                   onChange={(e) => setSbKey(e.target.value)}
                   className="w-full px-4 py-2.5 text-xs font-semibold rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-emerald-500 text-slate-900 dark:text-slate-100 font-mono"
@@ -1809,7 +1809,7 @@ create policy "Allow public access" on ${sbTable || 'spaflow_store'} for all usi
               </label>
               <input
                 type="text"
-                placeholder="spaflow_store"
+                placeholder="new_spa"
                 value={sbTable}
                 onChange={(e) => setSbTable(e.target.value)}
                 className="w-full sm:w-1/2 px-4 py-2.5 text-xs font-semibold rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-emerald-500 text-slate-900 dark:text-slate-100 font-mono"
@@ -1837,15 +1837,13 @@ create policy "Allow public access" on ${sbTable || 'spaflow_store'} for all usi
                 <span>Save & Connect Supabase</span>
               </button>
 
-              {(sbUrl || sbKey) && (
-                <button
-                  type="button"
-                  onClick={handleDisconnectSupabase}
-                  className="px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 font-bold text-xs transition-all"
-                >
-                  Disconnect / Clear
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleDisconnectSupabase}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-all"
+              >
+                Reset to Default Database
+              </button>
             </div>
 
             {sbTestResult && (
