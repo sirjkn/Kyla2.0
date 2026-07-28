@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
-import { db } from './src/db/index.ts';
+import { withDbRetry } from './src/db/index.ts';
 import { appStore } from './src/db/schema.ts';
 import { eq } from 'drizzle-orm';
 
@@ -19,7 +19,7 @@ async function startServer() {
   // Get all store data (online sync)
   app.get('/api/store/all', async (req, res) => {
     try {
-      const rows = await db.select().from(appStore);
+      const rows = await withDbRetry((db) => db.select().from(appStore));
       const result: Record<string, any> = {};
       rows.forEach((row) => {
         result[row.key] = row.data;
@@ -35,7 +35,7 @@ async function startServer() {
   app.get('/api/store/:key', async (req, res) => {
     try {
       const { key } = req.params;
-      const rows = await db.select().from(appStore).where(eq(appStore.key, key));
+      const rows = await withDbRetry((db) => db.select().from(appStore).where(eq(appStore.key, key)));
       if (rows.length === 0) {
         return res.json({ success: true, data: null });
       }
@@ -54,20 +54,22 @@ async function startServer() {
         return res.status(400).json({ error: 'Key is required' });
       }
 
-      await db
-        .insert(appStore)
-        .values({
-          key,
-          data,
-          updatedAt: new Date(),
-        })
-        .onConflictDoUpdate({
-          target: appStore.key,
-          set: {
+      await withDbRetry((db) =>
+        db
+          .insert(appStore)
+          .values({
+            key,
             data,
             updatedAt: new Date(),
-          },
-        });
+          })
+          .onConflictDoUpdate({
+            target: appStore.key,
+            set: {
+              data,
+              updatedAt: new Date(),
+            },
+          })
+      );
 
       res.json({ success: true, key });
     } catch (error: any) {
@@ -84,24 +86,26 @@ async function startServer() {
         return res.status(400).json({ error: 'Items array is required' });
       }
 
-      for (const item of items) {
-        if (item.key) {
-          await db
-            .insert(appStore)
-            .values({
-              key: item.key,
-              data: item.data,
-              updatedAt: new Date(),
-            })
-            .onConflictDoUpdate({
-              target: appStore.key,
-              set: {
+      await withDbRetry(async (db) => {
+        for (const item of items) {
+          if (item.key) {
+            await db
+              .insert(appStore)
+              .values({
+                key: item.key,
                 data: item.data,
                 updatedAt: new Date(),
-              },
-            });
+              })
+              .onConflictDoUpdate({
+                target: appStore.key,
+                set: {
+                  data: item.data,
+                  updatedAt: new Date(),
+                },
+              });
+          }
         }
-      }
+      });
 
       res.json({ success: true, count: items.length });
     } catch (error: any) {
