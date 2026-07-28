@@ -12,6 +12,8 @@ import {
   Search
 } from 'lucide-react';
 
+import { getUserPasswords, saveUserPassword } from '../lib/storage';
+
 interface LoginPageProps {
   staff: Staff[];
   company: CompanyDetails;
@@ -19,29 +21,12 @@ interface LoginPageProps {
 }
 
 export function getUserPassword(userId: string): string {
-  try {
-    const saved = localStorage.getItem('spaflow_user_passwords_v1');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed[userId]) {
-        return parsed[userId];
-      }
-    }
-  } catch (e) {
-    console.error('Failed to load user password', e);
-  }
-  return '12345'; // Default password requested by user
+  const passwords = getUserPasswords();
+  return passwords[userId] || '12345'; // Default password requested by user
 }
 
 export function setUserPassword(userId: string, newPass: string): void {
-  try {
-    const saved = localStorage.getItem('spaflow_user_passwords_v1');
-    const passwords = saved ? JSON.parse(saved) : {};
-    passwords[userId] = newPass;
-    localStorage.setItem('spaflow_user_passwords_v1', JSON.stringify(passwords));
-  } catch (e) {
-    console.error('Failed to save user password', e);
-  }
+  saveUserPassword(userId, newPass);
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({

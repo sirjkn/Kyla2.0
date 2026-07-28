@@ -22,7 +22,7 @@ import {
   INITIAL_CUSTOMERS
 } from '../data/initialData';
 
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
   CATEGORIES: 'spaflow_categories_v1',
   SERVICES: 'spaflow_services_v1',
   STAFF: 'spaflow_staff_v1',
@@ -33,7 +33,85 @@ const STORAGE_KEYS = {
   PAYMENT_METHODS: 'spaflow_payments_v1',
   THEME: 'spaflow_theme_v1',
   CUSTOMERS: 'spaflow_customers_v1',
+  PASSWORDS: 'spaflow_user_passwords_v1',
 };
+
+// Cloud SQL Online Sync Helper
+export async function syncToCloud(key: string, data: any): Promise<void> {
+  try {
+    await fetch('/api/store/set', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, data }),
+    });
+  } catch (e) {
+    console.error(`Failed to sync key ${key} to Cloud SQL`, e);
+  }
+}
+
+// Fetch all online state from Cloud SQL database
+export async function loadAllFromCloud(): Promise<boolean> {
+  try {
+    const res = await fetch('/api/store/all');
+    if (!res.ok) return false;
+    const json = await res.json();
+    if (json.success && json.data) {
+      const keys = Object.keys(json.data);
+      if (keys.length === 0) {
+        // Seed initial data to cloud if database is empty
+        const initialItems = [
+          { key: STORAGE_KEYS.CATEGORIES, data: INITIAL_CATEGORIES },
+          { key: STORAGE_KEYS.SERVICES, data: INITIAL_SERVICES },
+          { key: STORAGE_KEYS.STAFF, data: INITIAL_STAFF },
+          { key: STORAGE_KEYS.COMPANY, data: INITIAL_COMPANY_DETAILS },
+          { key: STORAGE_KEYS.RECEIPT, data: INITIAL_RECEIPT_SETTINGS },
+          { key: STORAGE_KEYS.LOGS, data: INITIAL_ACTIVITY_LOGS },
+          { key: STORAGE_KEYS.PAYMENT_METHODS, data: INITIAL_PAYMENT_METHODS },
+          { key: STORAGE_KEYS.TRANSACTIONS, data: INITIAL_TRANSACTIONS },
+          { key: STORAGE_KEYS.CUSTOMERS, data: INITIAL_CUSTOMERS },
+          { key: STORAGE_KEYS.PASSWORDS, data: {} },
+        ];
+        await fetch('/api/store/bulk-set', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: initialItems }),
+        });
+        return true;
+      }
+
+      Object.entries(json.data).forEach(([key, val]) => {
+        if (val !== undefined && val !== null) {
+          localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+        }
+      });
+      return true;
+    }
+  } catch (e) {
+    console.error('Failed to sync from Cloud SQL', e);
+  }
+  return false;
+}
+
+// User Password Management (Online Synced across devices)
+export function getUserPasswords(): Record<string, string> {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.PASSWORDS);
+    return saved ? JSON.parse(saved) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveUserPassword(userId: string, newPass: string): void {
+  try {
+    const passwords = getUserPasswords();
+    passwords[userId] = newPass;
+    localStorage.setItem(STORAGE_KEYS.PASSWORDS, JSON.stringify(passwords));
+    syncToCloud(STORAGE_KEYS.PASSWORDS, passwords);
+  } catch (e) {
+    console.error('Failed to save user password', e);
+  }
+}
 
 export interface FullBackupData {
   version: string;
@@ -79,6 +157,7 @@ export function loadPaymentMethods(): PaymentMethodConfig[] {
 export function savePaymentMethods(methods: PaymentMethodConfig[]): void {
   try {
     localStorage.setItem(STORAGE_KEYS.PAYMENT_METHODS, JSON.stringify(methods));
+    syncToCloud(STORAGE_KEYS.PAYMENT_METHODS, methods);
   } catch (e) {
     console.error('Failed to save payment methods', e);
   }
@@ -92,7 +171,7 @@ export function loadTransactions(): Transaction[] {
       return INITIAL_TRANSACTIONS;
     }
     const loaded: Transaction[] = JSON.parse(saved);
-    if (!Array.isArray(loaded) || loaded.length < 500) {
+    if (!Array.isArray(loaded)) {
       localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(INITIAL_TRANSACTIONS));
       return INITIAL_TRANSACTIONS;
     }
@@ -106,6 +185,7 @@ export function loadTransactions(): Transaction[] {
 export function saveTransactions(transactions: Transaction[]): void {
   try {
     localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
+    syncToCloud(STORAGE_KEYS.TRANSACTIONS, transactions);
   } catch (e) {
     console.error('Failed to save transactions', e);
   }
@@ -124,6 +204,7 @@ export function loadCustomers(): Customer[] {
 export function saveCustomers(customers: Customer[]): void {
   try {
     localStorage.setItem(STORAGE_KEYS.CUSTOMERS, JSON.stringify(customers));
+    syncToCloud(STORAGE_KEYS.CUSTOMERS, customers);
   } catch (e) {
     console.error('Failed to save customers', e);
   }
@@ -165,6 +246,7 @@ export function saveCategories(categories: Category[]): void {
       name: capitalizeWords(c.name)
     }));
     localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(formatted));
+    syncToCloud(STORAGE_KEYS.CATEGORIES, formatted);
   } catch (e) {
     console.error('Failed to save categories', e);
   }
@@ -194,6 +276,7 @@ export function saveServices(services: Service[]): void {
       name: capitalizeWords(srv.name)
     }));
     localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(formatted));
+    syncToCloud(STORAGE_KEYS.SERVICES, formatted);
   } catch (e) {
     console.error('Failed to save services', e);
   }
@@ -257,6 +340,7 @@ export function saveStaff(staff: Staff[]): void {
   try {
     const deduplicated = deduplicateStaff(staff);
     localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(deduplicated));
+    syncToCloud(STORAGE_KEYS.STAFF, deduplicated);
   } catch (e) {
     console.error('Failed to save staff', e);
   }
@@ -275,6 +359,7 @@ export function loadCompanyDetails(): CompanyDetails {
 export function saveCompanyDetails(company: CompanyDetails): void {
   try {
     localStorage.setItem(STORAGE_KEYS.COMPANY, JSON.stringify(company));
+    syncToCloud(STORAGE_KEYS.COMPANY, company);
   } catch (e) {
     console.error('Failed to save company details', e);
   }
@@ -293,6 +378,7 @@ export function loadReceiptSettings(): ReceiptSettings {
 export function saveReceiptSettings(receipt: ReceiptSettings): void {
   try {
     localStorage.setItem(STORAGE_KEYS.RECEIPT, JSON.stringify(receipt));
+    syncToCloud(STORAGE_KEYS.RECEIPT, receipt);
   } catch (e) {
     console.error('Failed to save receipt settings', e);
   }
@@ -310,7 +396,9 @@ export function loadActivityLogs(): ActivityLog[] {
 
 export function saveActivityLogs(logs: ActivityLog[]): void {
   try {
-    localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(logs.slice(0, 50))); // Keep latest 50
+    const sliced = logs.slice(0, 50);
+    localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(sliced));
+    syncToCloud(STORAGE_KEYS.LOGS, sliced);
   } catch (e) {
     console.error('Failed to save activity logs', e);
   }

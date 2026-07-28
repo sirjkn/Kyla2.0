@@ -25,7 +25,8 @@ import {
   loadCustomers, saveCustomers,
   loadTheme, saveTheme,
   exportBackupJSON, importBackupJSON, importLegacyJSON, resetToFactoryDefaults,
-  capitalizeWords, deduplicateStaff
+  capitalizeWords, deduplicateStaff,
+  loadAllFromCloud
 } from './lib/storage';
 
 import { Header } from './components/Header';
@@ -86,8 +87,8 @@ export default function App() {
   });
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
 
-  // Load Initial Data from localStorage on Mount
-  useEffect(() => {
+  // Function to refresh state from storage
+  const refreshAppState = () => {
     setCategories(loadCategories());
     setServices(loadServices());
     setStaff(loadStaff());
@@ -97,11 +98,53 @@ export default function App() {
     setPaymentMethods(loadPaymentMethods());
     setTransactions(loadTransactions());
     setCustomers(loadCustomers());
+  };
+
+  // Load Initial Data & Sync with Cloud SQL Database
+  useEffect(() => {
+    refreshAppState();
+
+    // Sync online database from Cloud SQL
+    loadAllFromCloud().then((synced) => {
+      if (synced) {
+        refreshAppState();
+      }
+    });
+
+    // Fast Periodic Background Sync with Cloud SQL (every 2.5 seconds for real-time sales across devices)
+    const interval = setInterval(() => {
+      loadAllFromCloud().then((synced) => {
+        if (synced) {
+          refreshAppState();
+        }
+      });
+    }, 2500);
+
+    const handleFocus = () => {
+      loadAllFromCloud().then((synced) => {
+        if (synced) {
+          refreshAppState();
+        }
+      });
+    };
+
+    const handleStorage = () => {
+      refreshAppState();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('storage', handleStorage);
 
     // Enforce light mode
     document.documentElement.classList.remove('dark');
     setTheme('light');
     saveTheme('light');
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('storage', handleStorage);
+    };
   }, []);
 
   // Sync theme class on <html> element
