@@ -52,6 +52,14 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
   onDeleteTransaction,
   onDeleteAllTransactions,
 }) => {
+  const getTodayString = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const isAdmin = 
     currentUser?.role?.toLowerCase().includes('admin') || 
     currentUser?.role?.toLowerCase().includes('owner') || 
@@ -59,8 +67,39 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPaymentFilter, setSelectedPaymentFilter] = useState<string>('all');
   const [selectedEmployeeFilter, setSelectedEmployeeFilter] = useState<string>('all');
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
+  const [startDate, setStartDate] = useState<string>(() => getTodayString());
+  const [endDate, setEndDate] = useState<string>(() => getTodayString());
+
+  const setPresetToday = () => {
+    const today = getTodayString();
+    setStartDate(today);
+    setEndDate(today);
+  };
+
+  const setPresetYesterday = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const yest = `${year}-${month}-${day}`;
+    setStartDate(yest);
+    setEndDate(yest);
+  };
+
+  const setPresetThisMonth = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const today = getTodayString();
+    setStartDate(`${year}-${month}-01`);
+    setEndDate(today);
+  };
+
+  const setPresetAllTime = () => {
+    setStartDate('');
+    setEndDate('');
+  };
   const [viewingTransaction, setViewingTransaction] = useState<Transaction | null>(null);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [deletingTrx, setDeletingTrx] = useState<Transaction | null>(null);
@@ -123,19 +162,19 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
     return matchesSearch && matchesPayment && matchesEmployee && matchesDate;
   });
 
-  // Calculate Metrics
-  const totalRevenue = transactions.reduce((acc, curr) => (curr.status === 'completed' ? acc + curr.total : acc), 0);
-  const totalCount = transactions.length;
+  // Calculate Metrics based on filtered view
+  const totalRevenue = filteredTransactions.reduce((acc, curr) => (curr.status === 'completed' ? acc + curr.total : acc), 0);
+  const totalCount = filteredTransactions.length;
 
-  const mpesaRevenue = transactions
+  const mpesaRevenue = filteredTransactions
     .filter((t) => t.paymentMethod === 'mpesa' && t.status === 'completed')
     .reduce((acc, curr) => acc + curr.total, 0);
 
-  const cashRevenue = transactions
+  const cashRevenue = filteredTransactions
     .filter((t) => t.paymentMethod === 'cash' && t.status === 'completed')
     .reduce((acc, curr) => acc + curr.total, 0);
 
-  const cardRevenue = transactions
+  const cardRevenue = filteredTransactions
     .filter((t) => t.paymentMethod === 'card' && t.status === 'completed')
     .reduce((acc, curr) => acc + curr.total, 0);
 
@@ -658,6 +697,50 @@ export const TransactionsManager: React.FC<TransactionsManagerProps> = ({
               <Calendar className="w-3.5 h-3.5 text-blue-600" />
               Date Range:
             </span>
+
+            {/* Quick Presets */}
+            <div className="flex flex-wrap items-center gap-1 mr-1">
+              <button
+                type="button"
+                onClick={setPresetToday}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all shadow-2xs ${
+                  startDate === getTodayString() && endDate === getTodayString()
+                    ? 'bg-blue-600 text-white shadow-blue-500/20'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+                id="preset-today-btn"
+              >
+                Today
+              </button>
+              <button
+                type="button"
+                onClick={setPresetYesterday}
+                className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                id="preset-yesterday-btn"
+              >
+                Yesterday
+              </button>
+              <button
+                type="button"
+                onClick={setPresetThisMonth}
+                className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                id="preset-month-btn"
+              >
+                This Month
+              </button>
+              <button
+                type="button"
+                onClick={setPresetAllTime}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                  !startDate && !endDate
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+                id="preset-all-time-btn"
+              >
+                All Time
+              </button>
+            </div>
 
             <div className="flex items-center space-x-1.5">
               <span className="text-[11px]">From</span>
