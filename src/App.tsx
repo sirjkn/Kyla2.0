@@ -26,7 +26,7 @@ import {
   loadTheme, saveTheme,
   exportBackupJSON, importBackupJSON, importLegacyJSON, resetToFactoryDefaults,
   capitalizeWords, deduplicateStaff,
-  loadAllFromCloud
+  loadAllFromCloud, getApiBaseUrl
 } from './lib/storage';
 
 import { Header } from './components/Header';
@@ -125,7 +125,8 @@ export default function App() {
         try { eventSource.close(); } catch {}
       }
       try {
-        eventSource = new EventSource('/api/store/events');
+        const baseUrl = getApiBaseUrl();
+        eventSource = new EventSource(`${baseUrl}/api/store/events`);
         eventSource.onmessage = (e) => {
           try {
             const data = JSON.parse(e.data);

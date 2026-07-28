@@ -56,6 +56,34 @@ function notifyAppSync() {
   }
 }
 
+export function getApiBaseUrl(): string {
+  // 1. Environment variable VITE_API_URL set in Vercel or environment
+  const envUrl = (import.meta as any).env?.VITE_API_URL;
+  if (envUrl && typeof envUrl === 'string' && envUrl.trim()) {
+    return envUrl.trim().replace(/\/+$/, '');
+  }
+  // 2. Custom API URL saved in localStorage
+  try {
+    const saved = localStorage.getItem('spaflow_api_url');
+    if (saved && saved.trim()) {
+      return saved.trim().replace(/\/+$/, '');
+    }
+  } catch {}
+
+  return '';
+}
+
+export function setApiBaseUrl(url: string) {
+  try {
+    if (url) {
+      localStorage.setItem('spaflow_api_url', url.trim());
+    } else {
+      localStorage.removeItem('spaflow_api_url');
+    }
+  } catch {}
+  notifyAppSync();
+}
+
 // Cloud SQL Online Sync Helper (Writes directly to Cloud SQL & memory)
 export async function syncToCloud(key: string, data: any): Promise<void> {
   memoryStore[key] = data;
@@ -66,10 +94,11 @@ export async function syncToCloud(key: string, data: any): Promise<void> {
   }
   notifyAppSync();
 
+  const baseUrl = getApiBaseUrl();
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       cloudSyncStatus = 'syncing';
-      const res = await fetch('/api/store/set', {
+      const res = await fetch(`${baseUrl}/api/store/set`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key, data }),
@@ -90,10 +119,11 @@ export async function syncToCloud(key: string, data: any): Promise<void> {
 
 // Fetch all online state from Cloud SQL database with retry resilience
 export async function loadAllFromCloud(): Promise<boolean> {
+  const baseUrl = getApiBaseUrl();
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       cloudSyncStatus = 'syncing';
-      const res = await fetch(`/api/store/all?_t=${Date.now()}`, {
+      const res = await fetch(`${baseUrl}/api/store/all?_t=${Date.now()}`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -131,7 +161,7 @@ export async function loadAllFromCloud(): Promise<boolean> {
             try { localStorage.setItem(item.key, JSON.stringify(item.data)); } catch {}
           });
 
-          await fetch('/api/store/bulk-set', {
+          await fetch(`${baseUrl}/api/store/bulk-set`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ items: initialItems }),

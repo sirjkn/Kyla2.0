@@ -10,7 +10,7 @@ import {
 } from '../types';
 import { PaymentSettings } from './PaymentSettings';
 import { getUserPassword, setUserPassword } from './LoginPage';
-import { getCloudSyncMetrics, loadAllFromCloud } from '../lib/storage';
+import { getCloudSyncMetrics, loadAllFromCloud, getApiBaseUrl, setApiBaseUrl } from '../lib/storage';
 import { 
   Building2, 
   Users, 
@@ -114,6 +114,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   // Realtime Cloud Monitor State
   const [isSyncingNow, setIsSyncingNow] = useState(false);
   const [syncMsg, setSyncMsg] = useState('');
+  const [customApiUrl, setCustomApiUrl] = useState(() => getApiBaseUrl());
+  const [apiUrlSaved, setApiUrlSaved] = useState(false);
   const syncMetrics = getCloudSyncMetrics();
 
   const handleForceCloudSync = async () => {
@@ -123,6 +125,13 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
     setIsSyncingNow(false);
     setSyncMsg('All records freshly synchronized from Cloud SQL database!');
     setTimeout(() => setSyncMsg(''), 3000);
+  };
+
+  const handleSaveApiUrl = () => {
+    setApiBaseUrl(customApiUrl);
+    setApiUrlSaved(true);
+    setTimeout(() => setApiUrlSaved(false), 2500);
+    handleForceCloudSync();
   };
 
   // Company Details Form State
@@ -1650,6 +1659,50 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                 All POS transaction sales, service updates, staff roster edits, customer records, and system settings bypass browser-local storage and persist directly to the PostgreSQL Cloud database. Changes are instantly broadcast in real-time across all mobile browsers (iOS Safari & Android Chrome) and desktop terminals via Server-Sent Events (SSE) and visibility wake streams.
               </div>
             </div>
+          </div>
+
+          {/* Vercel & External Host Backend Endpoint Configuration */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div>
+                <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Server className="w-4 h-4 text-blue-600" />
+                  <span>Backend API Server Endpoint (Vercel & External Deployments)</span>
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  If hosting the frontend on Vercel while your backend runs on Cloud Run / AI Studio, enter the backend server URL here or set <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-[11px] font-mono">VITE_API_URL</code> in Vercel environment variables.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${customApiUrl ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
+                  {customApiUrl ? 'Cross-Origin API Active' : 'Same-Origin Relative (/api)'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <input
+                type="text"
+                placeholder="https://ais-pre-bwjf3deqw6kvgzvtzmkor6-323778325007.europe-west2.run.app (Leave empty for same origin)"
+                value={customApiUrl}
+                onChange={(e) => setCustomApiUrl(e.target.value)}
+                className="flex-1 px-4 py-2.5 text-xs font-semibold rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-600 text-slate-900 dark:text-slate-100 font-mono"
+              />
+              <button
+                type="button"
+                onClick={handleSaveApiUrl}
+                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md transition-all shrink-0 active:scale-95"
+              >
+                {apiUrlSaved ? 'Saved & Reconnected!' : 'Save Endpoint'}
+              </button>
+            </div>
+            
+            {apiUrlSaved && (
+              <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 animate-fadeIn">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>API Endpoint updated! Database connection established.</span>
+              </p>
+            )}
           </div>
 
           {/* Real-time Cloud Metrics Grid */}
