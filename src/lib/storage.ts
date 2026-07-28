@@ -1,3 +1,4 @@
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { 
   Category, 
   Service, 
@@ -36,16 +37,117 @@ export const STORAGE_KEYS = {
   PASSWORDS: 'spaflow_user_passwords_v1',
 };
 
-// In-Memory Cloud Data Store (Primary Source of Truth across devices)
+// In-Memory Data Store (Primary Source of Truth in client)
 const memoryStore: Record<string, any> = {};
 let lastSyncTimestamp: string | null = null;
 let cloudSyncStatus: 'online' | 'syncing' | 'offline' = 'online';
 
+export interface SupabaseConfig {
+  url: string;
+  key: string;
+  tableName: string;
+}
+
+let cachedSupabaseClient: SupabaseClient | null = null;
+let cachedSupabaseConfig: SupabaseConfig | null = null;
+
+export function getSupabaseConfig(): SupabaseConfig {
+  try {
+    const url = localStorage.getItem('spaflow_supabase_url') || (import.meta as any).env?.VITE_SUPABASE_URL || '';
+    const key = localStorage.getItem('spaflow_supabase_key') || (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || '';
+    const tableName = localStorage.getItem('spaflow_supabase_table') || 'spaflow_store';
+    return { url: url.trim(), key: key.trim(), tableName: tableName.trim() || 'spaflow_store' };
+  } catch {
+    return { url: '', key: '', tableName: 'spaflow_store' };
+  }
+}
+
+export function setSupabaseConfig(url: string, key: string, tableName = 'spaflow_store') {
+  try {
+    if (url.trim() && key.trim()) {
+      localStorage.setItem('spaflow_supabase_url', url.trim());
+      localStorage.setItem('spaflow_supabase_key', key.trim());
+      localStorage.setItem('spaflow_supabase_table', tableName.trim() || 'spaflow_store');
+    } else {
+      localStorage.removeItem('spaflow_supabase_url');
+      localStorage.removeItem('spaflow_supabase_key');
+      localStorage.removeItem('spaflow_supabase_table');
+    }
+  } catch {}
+  cachedSupabaseClient = null;
+  cachedSupabaseConfig = null;
+  notifyAppSync();
+}
+
+export function getSupabaseClient(): { client: SupabaseClient; tableName: string } | null {
+  const config = getSupabaseConfig();
+  if (!config.url || !config.key) return null;
+
+  if (cachedSupabaseClient && cachedSupabaseConfig?.url === config.url && cachedSupabaseConfig?.key === config.key) {
+    return { client: cachedSupabaseClient, tableName: config.tableName };
+  }
+
+  try {
+    cachedSupabaseClient = createClient(config.url, config.key, {
+      auth: { persistSession: false },
+    });
+    cachedSupabaseConfig = config;
+    return { client: cachedSupabaseClient, tableName: config.tableName };
+  } catch (err) {
+    console.error('Failed to initialize Supabase client:', err);
+    return null;
+  }
+}
+
+export async function testSupabaseConnection(url: string, key: string, tableName = 'spaflow_store'): Promise<{ success: boolean; message: string }> {
+  try {
+    const trimmedUrl = url.trim();
+    const trimmedKey = key.trim();
+    const trimmedTable = tableName.trim() || 'spaflow_store';
+
+    if (!trimmedUrl || !trimmedKey) {
+      return { success: false, message: 'Please enter both your Supabase Project URL and Anon/Public Key.' };
+    }
+
+    if (!trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://')) {
+      return { success: false, message: 'Supabase URL must start with https:// (e.g. https://xyzcompany.supabase.co)' };
+    }
+
+    const testClient = createClient(trimmedUrl, trimmedKey, { auth: { persistSession: false } });
+    const { error } = await testClient.from(trimmedTable).select('key').limit(1);
+
+    if (error) {
+      if (error.code === '42P01' || error.message.includes('relation') || error.message.includes('does not exist')) {
+        return {
+          success: false,
+          message: `Connected to Supabase! Table "${trimmedTable}" is missing. Please run the provided SQL script in your Supabase SQL Editor to create it.`
+        };
+      }
+      if (error.code === '42501' || error.message.includes('permission') || error.message.includes('policy')) {
+        return {
+          success: false,
+          message: `Connected to Supabase, but Row Level Security (RLS) policies block public access on "${trimmedTable}". Enable anon policies using the SQL query below.`
+        };
+      }
+      return { success: false, message: `Supabase database error: ${error.message}` };
+    }
+
+    return { success: true, message: `Successfully connected to Supabase table "${trimmedTable}"!` };
+  } catch (err: any) {
+    return { success: false, message: `Connection error: ${err?.message || err}` };
+  }
+}
+
 export function getCloudSyncMetrics() {
+  const sbConfig = getSupabaseConfig();
+  const isSupabaseConnected = Boolean(sbConfig.url && sbConfig.key);
   return {
     lastSync: lastSyncTimestamp || new Date().toISOString(),
     status: cloudSyncStatus,
     keysCount: Object.keys(memoryStore).length,
+    isSupabaseConnected,
+    supabaseUrl: sbConfig.url,
+    supabaseTable: sbConfig.tableName,
     memoryStore
   };
 }
@@ -77,12 +179,10 @@ export function formatApiUrl(input: string): string {
   let cleaned = input.trim().replace(/\/+$/, '');
   if (!cleaned) return '';
   
-  // If it's already full http or https
   if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) {
     return cleaned;
   }
   
-  // If it contains a dot or localhost (e.g. domain.com or my-app.run.app)
   if (cleaned.includes('.') || cleaned.startsWith('localhost')) {
     return `https://${cleaned}`;
   }
@@ -102,7 +202,7 @@ export function setApiBaseUrl(url: string) {
   notifyAppSync();
 }
 
-// Cloud SQL Online Sync Helper (Writes directly to Cloud SQL & memory)
+// Online Sync Helper (Syncs to Supabase if configured, or clean local store)
 export async function syncToCloud(key: string, data: any): Promise<void> {
   memoryStore[key] = data;
   try {
@@ -112,55 +212,79 @@ export async function syncToCloud(key: string, data: any): Promise<void> {
   }
   notifyAppSync();
 
-  const baseUrl = getApiBaseUrl();
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  // Check Supabase connection
+  const sb = getSupabaseClient();
+  if (sb) {
+    cloudSyncStatus = 'syncing';
     try {
-      cloudSyncStatus = 'syncing';
-      const res = await fetch(`${baseUrl}/api/store/set`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key, data }),
-      });
-      if (res.ok) {
+      const { error } = await sb.client.from(sb.tableName).upsert(
+        { key, data, updated_at: new Date().toISOString() },
+        { onConflict: 'key' }
+      );
+      if (!error) {
         cloudSyncStatus = 'online';
         lastSyncTimestamp = new Date().toISOString();
         return;
+      } else {
+        console.warn('[Supabase Sync Warning]', error.message);
+        cloudSyncStatus = 'offline';
+        return;
       }
     } catch (e) {
-      if (attempt < 3) {
-        await new Promise(r => setTimeout(r, 400 * attempt));
-      }
+      console.error('[Supabase Sync Error]', e);
+      cloudSyncStatus = 'offline';
+      return;
     }
   }
-  cloudSyncStatus = 'offline';
+
+  // If external custom API endpoint is configured
+  const baseUrl = getApiBaseUrl();
+  if (baseUrl) {
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        cloudSyncStatus = 'syncing';
+        const res = await fetch(`${baseUrl}/api/store/set`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key, data }),
+        });
+        if (res.ok) {
+          cloudSyncStatus = 'online';
+          lastSyncTimestamp = new Date().toISOString();
+          return;
+        }
+      } catch (e) {
+        if (attempt < 3) {
+          await new Promise(r => setTimeout(r, 400 * attempt));
+        }
+      }
+    }
+    cloudSyncStatus = 'offline';
+    return;
+  }
+
+  // Pure clean local mode
+  cloudSyncStatus = 'online';
+  lastSyncTimestamp = new Date().toISOString();
 }
 
-// Fetch all online state from Cloud SQL database with retry resilience
+// Fetch all online state from Supabase database or local state
 export async function loadAllFromCloud(): Promise<boolean> {
-  const baseUrl = getApiBaseUrl();
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  // Check Supabase connection
+  const sb = getSupabaseClient();
+  if (sb) {
+    cloudSyncStatus = 'syncing';
     try {
-      cloudSyncStatus = 'syncing';
-      const res = await fetch(`${baseUrl}/api/store/all?_t=${Date.now()}`, {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache'
-        }
-      });
-      if (!res.ok) {
-        if (attempt < 3) {
-          await new Promise(r => setTimeout(r, 300 * attempt));
-          continue;
-        }
+      const { data, error } = await sb.client.from(sb.tableName).select('key, data');
+      if (error) {
+        console.warn('[Supabase Fetch Error]', error.message);
         cloudSyncStatus = 'offline';
         return false;
       }
-      const json = await res.json();
-      if (json.success && json.data) {
-        const keys = Object.keys(json.data);
-        if (keys.length === 0) {
-          // Seed initial data to cloud if database is empty
+
+      if (data) {
+        if (data.length === 0) {
+          // Seed initial data to Supabase if table is empty
           const initialItems = [
             { key: STORAGE_KEYS.CATEGORIES, data: INITIAL_CATEGORIES },
             { key: STORAGE_KEYS.SERVICES, data: INITIAL_SERVICES },
@@ -173,17 +297,19 @@ export async function loadAllFromCloud(): Promise<boolean> {
             { key: STORAGE_KEYS.CUSTOMERS, data: INITIAL_CUSTOMERS },
             { key: STORAGE_KEYS.PASSWORDS, data: {} },
           ];
-          
+
+          const upsertPayload = initialItems.map(item => ({
+            key: item.key,
+            data: item.data,
+            updated_at: new Date().toISOString()
+          }));
+
           initialItems.forEach(item => {
             memoryStore[item.key] = item.data;
             try { localStorage.setItem(item.key, JSON.stringify(item.data)); } catch {}
           });
 
-          await fetch(`${baseUrl}/api/store/bulk-set`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items: initialItems }),
-          });
+          await sb.client.from(sb.tableName).upsert(upsertPayload, { onConflict: 'key' });
           cloudSyncStatus = 'online';
           lastSyncTimestamp = new Date().toISOString();
           notifyAppSync();
@@ -191,17 +317,17 @@ export async function loadAllFromCloud(): Promise<boolean> {
         }
 
         let hasChanges = false;
-        Object.entries(json.data).forEach(([key, val]) => {
-          if (val !== undefined && val !== null) {
-            const parsed = typeof val === 'string' ? JSON.parse(val) : val;
-            const currentStr = JSON.stringify(memoryStore[key]);
+        data.forEach((row: any) => {
+          if (row.key && row.data !== undefined && row.data !== null) {
+            const parsed = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
+            const currentStr = JSON.stringify(memoryStore[row.key]);
             const newStr = JSON.stringify(parsed);
             if (currentStr !== newStr) {
               hasChanges = true;
             }
-            memoryStore[key] = parsed;
+            memoryStore[row.key] = parsed;
             try {
-              localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+              localStorage.setItem(row.key, typeof row.data === 'string' ? row.data : JSON.stringify(row.data));
             } catch {}
           }
         });
@@ -214,13 +340,103 @@ export async function loadAllFromCloud(): Promise<boolean> {
         return hasChanges;
       }
     } catch (e) {
-      if (attempt < 3) {
-        await new Promise(r => setTimeout(r, 400 * attempt));
-        continue;
-      }
+      console.error('[Supabase Load Error]', e);
       cloudSyncStatus = 'offline';
+      return false;
     }
   }
+
+  // Check custom API URL
+  const baseUrl = getApiBaseUrl();
+  if (baseUrl) {
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        cloudSyncStatus = 'syncing';
+        const res = await fetch(`${baseUrl}/api/store/all?_t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+          }
+        });
+        if (!res.ok) {
+          if (attempt < 3) {
+            await new Promise(r => setTimeout(r, 300 * attempt));
+            continue;
+          }
+          cloudSyncStatus = 'offline';
+          return false;
+        }
+        const json = await res.json();
+        if (json.success && json.data) {
+          const keys = Object.keys(json.data);
+          if (keys.length === 0) {
+            const initialItems = [
+              { key: STORAGE_KEYS.CATEGORIES, data: INITIAL_CATEGORIES },
+              { key: STORAGE_KEYS.SERVICES, data: INITIAL_SERVICES },
+              { key: STORAGE_KEYS.STAFF, data: INITIAL_STAFF },
+              { key: STORAGE_KEYS.COMPANY, data: INITIAL_COMPANY_DETAILS },
+              { key: STORAGE_KEYS.RECEIPT, data: INITIAL_RECEIPT_SETTINGS },
+              { key: STORAGE_KEYS.LOGS, data: INITIAL_ACTIVITY_LOGS },
+              { key: STORAGE_KEYS.PAYMENT_METHODS, data: INITIAL_PAYMENT_METHODS },
+              { key: STORAGE_KEYS.TRANSACTIONS, data: INITIAL_TRANSACTIONS },
+              { key: STORAGE_KEYS.CUSTOMERS, data: INITIAL_CUSTOMERS },
+              { key: STORAGE_KEYS.PASSWORDS, data: {} },
+            ];
+            
+            initialItems.forEach(item => {
+              memoryStore[item.key] = item.data;
+              try { localStorage.setItem(item.key, JSON.stringify(item.data)); } catch {}
+            });
+
+            await fetch(`${baseUrl}/api/store/bulk-set`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ items: initialItems }),
+            });
+            cloudSyncStatus = 'online';
+            lastSyncTimestamp = new Date().toISOString();
+            notifyAppSync();
+            return true;
+          }
+
+          let hasChanges = false;
+          Object.entries(json.data).forEach(([key, val]) => {
+            if (val !== undefined && val !== null) {
+              const parsed = typeof val === 'string' ? JSON.parse(val) : val;
+              const currentStr = JSON.stringify(memoryStore[key]);
+              const newStr = JSON.stringify(parsed);
+              if (currentStr !== newStr) {
+                hasChanges = true;
+              }
+              memoryStore[key] = parsed;
+              try {
+                localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+              } catch {}
+            }
+          });
+
+          cloudSyncStatus = 'online';
+          lastSyncTimestamp = new Date().toISOString();
+          if (hasChanges) {
+            notifyAppSync();
+          }
+          return hasChanges;
+        }
+      } catch (e) {
+        if (attempt < 3) {
+          await new Promise(r => setTimeout(r, 400 * attempt));
+          continue;
+        }
+        cloudSyncStatus = 'offline';
+      }
+    }
+    return false;
+  }
+
+  // Pure local mode
+  cloudSyncStatus = 'online';
+  lastSyncTimestamp = new Date().toISOString();
   return false;
 }
 

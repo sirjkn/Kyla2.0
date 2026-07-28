@@ -10,7 +10,16 @@ import {
 } from '../types';
 import { PaymentSettings } from './PaymentSettings';
 import { getUserPassword, setUserPassword } from './LoginPage';
-import { getCloudSyncMetrics, loadAllFromCloud, getApiBaseUrl, setApiBaseUrl, formatApiUrl } from '../lib/storage';
+import { 
+  getCloudSyncMetrics, 
+  loadAllFromCloud, 
+  getApiBaseUrl, 
+  setApiBaseUrl, 
+  formatApiUrl,
+  getSupabaseConfig,
+  setSupabaseConfig,
+  testSupabaseConnection
+} from '../lib/storage';
 import { 
   Building2, 
   Users, 
@@ -112,7 +121,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   // Selected staff user for Admin Password Manager tab
   const [adminSelectedUserId, setAdminSelectedUserId] = useState<string>('');
 
-  // Realtime Cloud Monitor State
+  // Realtime Cloud Monitor & Supabase Remote Database State
   const [isSyncingNow, setIsSyncingNow] = useState(false);
   const [syncMsg, setSyncMsg] = useState('');
   const [customApiUrl, setCustomApiUrl] = useState(() => getApiBaseUrl());
@@ -120,12 +129,21 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   const [apiUrlError, setApiUrlError] = useState('');
   const syncMetrics = getCloudSyncMetrics();
 
+  const initialSbConfig = getSupabaseConfig();
+  const [sbUrl, setSbUrl] = useState(initialSbConfig.url);
+  const [sbKey, setSbKey] = useState(initialSbConfig.key);
+  const [sbTable, setSbTable] = useState(initialSbConfig.tableName);
+  const [sbTesting, setSbTesting] = useState(false);
+  const [sbTestResult, setSbTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [sbSavedMsg, setSbSavedMsg] = useState('');
+  const [showSqlGuide, setShowSqlGuide] = useState(false);
+
   const handleForceCloudSync = async () => {
     setIsSyncingNow(true);
     setSyncMsg('');
     await loadAllFromCloud();
     setIsSyncingNow(false);
-    setSyncMsg('All records freshly synchronized from Cloud SQL database!');
+    setSyncMsg('All records freshly synchronized!');
     setTimeout(() => setSyncMsg(''), 3000);
   };
 
@@ -133,7 +151,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
     setApiUrlError('');
     const raw = customApiUrl.trim();
     if (raw && !raw.startsWith('http://') && !raw.startsWith('https://') && !raw.includes('.')) {
-      setApiUrlError('Invalid URL format. Please enter a valid HTTP/HTTPS web address (e.g., https://your-backend.run.app) or leave empty for same-origin server.');
+      setApiUrlError('Invalid URL format. Please enter a valid HTTP/HTTPS web address (e.g., https://your-backend.run.app) or leave empty for default.');
       return;
     }
 
@@ -142,6 +160,41 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
     setCustomApiUrl(formatted);
     setApiUrlSaved(true);
     setTimeout(() => setApiUrlSaved(false), 2500);
+    handleForceCloudSync();
+  };
+
+  const handleTestSupabase = async () => {
+    setSbTesting(true);
+    setSbTestResult(null);
+    const res = await testSupabaseConnection(sbUrl, sbKey, sbTable);
+    setSbTesting(false);
+    setSbTestResult(res);
+  };
+
+  const handleSaveSupabase = async () => {
+    setSbTesting(true);
+    setSbTestResult(null);
+    setSbSavedMsg('');
+    const res = await testSupabaseConnection(sbUrl, sbKey, sbTable);
+    setSbTesting(false);
+    setSbTestResult(res);
+
+    if (res.success || res.message.includes('missing') || res.message.includes('policy')) {
+      setSupabaseConfig(sbUrl, sbKey, sbTable);
+      setSbSavedMsg('Supabase Remote Database connection saved!');
+      setTimeout(() => setSbSavedMsg(''), 3000);
+      handleForceCloudSync();
+    }
+  };
+
+  const handleDisconnectSupabase = () => {
+    setSupabaseConfig('', '', 'spaflow_store');
+    setSbUrl('');
+    setSbKey('');
+    setSbTable('spaflow_store');
+    setSbTestResult(null);
+    setSbSavedMsg('Supabase connection cleared.');
+    setTimeout(() => setSbSavedMsg(''), 3000);
     handleForceCloudSync();
   };
 
@@ -1616,32 +1669,38 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
       )}
 
       {/* ========================================================= */}
-      {/* REALTIME CLOUD DATABASE MONITOR TAB */}
+      {/* REALTIME DATABASE & SUPABASE REMOTE CONNECTION TAB */}
       {/* ========================================================= */}
       {activeSubTab === 'realtime' && (
         <div className="space-y-6 animate-fadeIn">
-          {/* Main Monitor Header Banner */}
-          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+          {/* Main Supabase Header Banner */}
+          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-emerald-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden border border-emerald-500/30">
             <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-              <Server className="w-48 h-48" />
+              <Database className="w-48 h-48 text-emerald-400" />
             </div>
 
             <div className="relative z-10 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold">
-                    <Activity className="w-6 h-6 animate-pulse" />
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center font-bold shadow-inner">
+                    <Database className="w-6 h-6 animate-pulse" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-xl font-extrabold tracking-tight">Realtime Cloud Database Status</h3>
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
-                        Live Online
+                      <h3 className="text-xl font-extrabold tracking-tight">Supabase Remote Database Connection</h3>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 ${
+                        syncMetrics.isSupabaseConnected 
+                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' 
+                          : 'bg-slate-700/60 text-slate-300 border border-slate-600'
+                      }`}>
+                        <span className={`w-2 h-2 rounded-full inline-block ${syncMetrics.isSupabaseConnected ? 'bg-emerald-400 animate-ping' : 'bg-amber-400'}`} />
+                        {syncMetrics.isSupabaseConnected ? 'Supabase Connected' : 'Clean Local Storage Mode'}
                       </span>
                     </div>
                     <p className="text-xs text-slate-300 mt-0.5">
-                      Cloud SQL PostgreSQL • High Availability • Direct Device-to-Cloud Sync
+                      {syncMetrics.isSupabaseConnected 
+                        ? `Connected to ${syncMetrics.supabaseUrl} • Table: ${syncMetrics.supabaseTable}`
+                        : 'Connect your Supabase PostgreSQL cloud database to persist sales and roster data remotely.'}
                     </p>
                   </div>
                 </div>
@@ -1650,10 +1709,10 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                   type="button"
                   onClick={handleForceCloudSync}
                   disabled={isSyncingNow}
-                  className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-xs shadow-lg transition-all flex items-center gap-2 active:scale-95"
+                  className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs shadow-lg transition-all flex items-center gap-2 active:scale-95"
                 >
                   <RefreshCw className={`w-4 h-4 ${isSyncingNow ? 'animate-spin' : ''}`} />
-                  <span>{isSyncingNow ? 'Syncing...' : 'Force Cloud Sync Now'}</span>
+                  <span>{isSyncingNow ? 'Syncing...' : 'Sync Database Now'}</span>
                 </button>
               </div>
 
@@ -1666,27 +1725,167 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
 
               {/* Architecture Highlight Box */}
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-xs text-slate-200 leading-relaxed">
-                <strong className="text-emerald-300 font-bold block mb-1">⚡ Zero Local Storage Dependence & Instant Mobile SSE Push:</strong>
-                All POS transaction sales, service updates, staff roster edits, customer records, and system settings bypass browser-local storage and persist directly to the PostgreSQL Cloud database. Changes are instantly broadcast in real-time across all mobile browsers (iOS Safari & Android Chrome) and desktop terminals via Server-Sent Events (SSE) and visibility wake streams.
+                <strong className="text-emerald-300 font-bold block mb-1">⚡ Clean App & Direct Remote Supabase Integration:</strong>
+                No internal mandatory database or Firebase background servers required! Connect your Supabase project below to save sales receipts, staff rosters, and inventory directly to your Supabase PostgreSQL instance.
               </div>
             </div>
           </div>
 
-          {/* Vercel & External Host Backend Endpoint Configuration */}
+          {/* Supabase Connection Form */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div>
+                <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Database className="w-4 h-4 text-emerald-600" />
+                  <span>Supabase API Credentials & Table Configuration</span>
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Enter your Supabase Project URL and Anon API key from your Supabase Dashboard (<code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-[11px] font-mono">Project Settings -&gt; API</code>).
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowSqlGuide(!showSqlGuide)}
+                className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-xs font-bold transition-all shrink-0 border border-emerald-200 dark:border-emerald-800"
+              >
+                {showSqlGuide ? 'Hide SQL Script' : '1-Click SQL Setup Script'}
+              </button>
+            </div>
+
+            {/* SQL Guide Drawer */}
+            {showSqlGuide && (
+              <div className="p-4 rounded-2xl bg-slate-950 text-slate-100 border border-slate-800 text-xs font-mono space-y-2 animate-fadeIn">
+                <div className="flex items-center justify-between text-slate-400 font-sans text-[11px] font-bold border-b border-slate-800 pb-2">
+                  <span>Supabase SQL Editor Script (Copy & Run in Supabase)</span>
+                  <span className="text-emerald-400">Creates table `{sbTable || 'spaflow_store'}`</span>
+                </div>
+                <pre className="overflow-x-auto text-emerald-300 p-2 bg-slate-900 rounded-xl leading-relaxed text-[11px]">
+{`-- 1. Create key-value state table
+create table if not exists ${sbTable || 'spaflow_store'} (
+  key text primary key,
+  data jsonb not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now())
+);
+
+-- 2. Enable Row Level Security and create public policy
+alter table ${sbTable || 'spaflow_store'} enable row level security;
+create policy "Allow public access" on ${sbTable || 'spaflow_store'} for all using (true) with check (true);`}
+                </pre>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">
+                  Supabase Project URL
+                </label>
+                <input
+                  type="text"
+                  placeholder="https://xyzcompany.supabase.co"
+                  value={sbUrl}
+                  onChange={(e) => setSbUrl(e.target.value)}
+                  className="w-full px-4 py-2.5 text-xs font-semibold rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-emerald-500 text-slate-900 dark:text-slate-100 font-mono"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">
+                  Supabase Anon / Public API Key
+                </label>
+                <input
+                  type="password"
+                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  value={sbKey}
+                  onChange={(e) => setSbKey(e.target.value)}
+                  className="w-full px-4 py-2.5 text-xs font-semibold rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-emerald-500 text-slate-900 dark:text-slate-100 font-mono"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">
+                Supabase Store Table Name
+              </label>
+              <input
+                type="text"
+                placeholder="spaflow_store"
+                value={sbTable}
+                onChange={(e) => setSbTable(e.target.value)}
+                className="w-full sm:w-1/2 px-4 py-2.5 text-xs font-semibold rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-emerald-500 text-slate-900 dark:text-slate-100 font-mono"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleTestSupabase}
+                disabled={sbTesting}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-all flex items-center gap-2"
+              >
+                <Activity className={`w-4 h-4 text-emerald-500 ${sbTesting ? 'animate-spin' : ''}`} />
+                <span>{sbTesting ? 'Testing Connection...' : 'Test Connection'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveSupabase}
+                disabled={sbTesting}
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 active:scale-95"
+              >
+                <Save className="w-4 h-4" />
+                <span>Save & Connect Supabase</span>
+              </button>
+
+              {(sbUrl || sbKey) && (
+                <button
+                  type="button"
+                  onClick={handleDisconnectSupabase}
+                  className="px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 font-bold text-xs transition-all"
+                >
+                  Disconnect / Clear
+                </button>
+              )}
+            </div>
+
+            {sbTestResult && (
+              <div className={`p-3.5 rounded-2xl border text-xs font-semibold flex items-start gap-2.5 animate-fadeIn ${
+                sbTestResult.success 
+                  ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200' 
+                  : 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200'
+              }`}>
+                {sbTestResult.success ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                ) : (
+                  <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+                )}
+                <span>{sbTestResult.message}</span>
+              </div>
+            )}
+
+            {sbSavedMsg && (
+              <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 animate-fadeIn">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{sbSavedMsg}</span>
+              </p>
+            )}
+          </div>
+
+          {/* External Backend Endpoint (Optional) */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
                 <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <Server className="w-4 h-4 text-blue-600" />
-                  <span>Backend API Server Endpoint (Vercel & External Deployments)</span>
+                  <span>Optional External Custom Backend API Endpoint</span>
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  If hosting the frontend on Vercel while your backend runs on Cloud Run / AI Studio, enter the backend server URL here or set <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-[11px] font-mono">VITE_API_URL</code> in Vercel environment variables.
+                  If hosting the app on external servers or custom proxy, configure the custom backend URL here or set <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-[11px] font-mono">VITE_API_URL</code>.
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${customApiUrl ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
-                  {customApiUrl ? 'Cross-Origin API Active' : 'Same-Origin Relative (/api)'}
+                  {customApiUrl ? 'Custom API Active' : 'Default / Standalone'}
                 </span>
               </div>
             </div>
@@ -1694,7 +1893,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <input
                 type="text"
-                placeholder="https://ais-pre-bwjf3deqw6kvgzvtzmkor6-323778325007.europe-west2.run.app (Leave empty for default same-origin)"
+                placeholder="https://your-custom-backend.com (Leave empty for default)"
                 value={customApiUrl}
                 onChange={(e) => {
                   setCustomApiUrl(e.target.value);
@@ -1708,7 +1907,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                   onClick={handleSaveApiUrl}
                   className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md transition-all shrink-0 active:scale-95"
                 >
-                  {apiUrlSaved ? 'Saved & Reconnected!' : 'Save Endpoint'}
+                  {apiUrlSaved ? 'Saved!' : 'Save Endpoint'}
                 </button>
                 {customApiUrl && (
                   <button
@@ -1722,7 +1921,6 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                       handleForceCloudSync();
                     }}
                     className="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition-all shrink-0"
-                    title="Reset to default same-origin"
                   >
                     Clear
                   </button>
@@ -1740,7 +1938,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
             {apiUrlSaved && !apiUrlError && (
               <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 animate-fadeIn">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span>API Endpoint updated! Database reconnected at {customApiUrl || 'Same-Origin /api'}.</span>
+                <span>API Endpoint updated! Reconnected at {customApiUrl || 'Default Same-Origin'}.</span>
               </p>
             )}
           </div>
