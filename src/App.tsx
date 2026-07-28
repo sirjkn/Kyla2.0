@@ -111,14 +111,14 @@ export default function App() {
       }
     });
 
-    // Fast Periodic Background Sync with Cloud SQL (every 2.5 seconds for real-time sales across devices)
+    // Fast Periodic Background Sync with Cloud SQL (every 1.5 seconds for real-time sales across devices)
     const interval = setInterval(() => {
       loadAllFromCloud().then((synced) => {
         if (synced) {
           refreshAppState();
         }
       });
-    }, 2500);
+    }, 1500);
 
     const handleFocus = () => {
       loadAllFromCloud().then((synced) => {
@@ -134,6 +134,7 @@ export default function App() {
 
     window.addEventListener('focus', handleFocus);
     window.addEventListener('storage', handleStorage);
+    window.addEventListener('spaflow-sync', handleStorage);
 
     // Enforce light mode
     document.documentElement.classList.remove('dark');
@@ -144,6 +145,7 @@ export default function App() {
       clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('spaflow-sync', handleStorage);
     };
   }, []);
 

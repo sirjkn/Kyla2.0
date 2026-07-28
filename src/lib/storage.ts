@@ -36,24 +36,64 @@ export const STORAGE_KEYS = {
   PASSWORDS: 'spaflow_user_passwords_v1',
 };
 
-// Cloud SQL Online Sync Helper
+// In-Memory Cloud Data Store (Primary Source of Truth across devices)
+const memoryStore: Record<string, any> = {};
+let lastSyncTimestamp: string | null = null;
+let cloudSyncStatus: 'online' | 'syncing' | 'offline' = 'online';
+
+export function getCloudSyncMetrics() {
+  return {
+    lastSync: lastSyncTimestamp || new Date().toISOString(),
+    status: cloudSyncStatus,
+    keysCount: Object.keys(memoryStore).length,
+    memoryStore
+  };
+}
+
+function notifyAppSync() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('spaflow-sync'));
+  }
+}
+
+// Cloud SQL Online Sync Helper (Writes directly to Cloud SQL & memory)
 export async function syncToCloud(key: string, data: any): Promise<void> {
+  memoryStore[key] = data;
   try {
-    await fetch('/api/store/set', {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (e) {
+    // Ignore quota errors
+  }
+  notifyAppSync();
+
+  try {
+    cloudSyncStatus = 'syncing';
+    const res = await fetch('/api/store/set', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key, data }),
     });
+    if (res.ok) {
+      cloudSyncStatus = 'online';
+      lastSyncTimestamp = new Date().toISOString();
+    } else {
+      cloudSyncStatus = 'offline';
+    }
   } catch (e) {
     console.error(`Failed to sync key ${key} to Cloud SQL`, e);
+    cloudSyncStatus = 'offline';
   }
 }
 
 // Fetch all online state from Cloud SQL database
 export async function loadAllFromCloud(): Promise<boolean> {
   try {
+    cloudSyncStatus = 'syncing';
     const res = await fetch('/api/store/all');
-    if (!res.ok) return false;
+    if (!res.ok) {
+      cloudSyncStatus = 'offline';
+      return false;
+    }
     const json = await res.json();
     if (json.success && json.data) {
       const keys = Object.keys(json.data);
@@ -71,32 +111,63 @@ export async function loadAllFromCloud(): Promise<boolean> {
           { key: STORAGE_KEYS.CUSTOMERS, data: INITIAL_CUSTOMERS },
           { key: STORAGE_KEYS.PASSWORDS, data: {} },
         ];
+        
+        initialItems.forEach(item => {
+          memoryStore[item.key] = item.data;
+          try { localStorage.setItem(item.key, JSON.stringify(item.data)); } catch {}
+        });
+
         await fetch('/api/store/bulk-set', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ items: initialItems }),
         });
+        cloudSyncStatus = 'online';
+        lastSyncTimestamp = new Date().toISOString();
+        notifyAppSync();
         return true;
       }
 
+      let hasChanges = false;
       Object.entries(json.data).forEach(([key, val]) => {
         if (val !== undefined && val !== null) {
-          localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+          const parsed = typeof val === 'string' ? JSON.parse(val) : val;
+          const currentStr = JSON.stringify(memoryStore[key]);
+          const newStr = JSON.stringify(parsed);
+          if (currentStr !== newStr) {
+            hasChanges = true;
+          }
+          memoryStore[key] = parsed;
+          try {
+            localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+          } catch {}
         }
       });
-      return true;
+
+      cloudSyncStatus = 'online';
+      lastSyncTimestamp = new Date().toISOString();
+      if (hasChanges) {
+        notifyAppSync();
+      }
+      return hasChanges;
     }
   } catch (e) {
     console.error('Failed to sync from Cloud SQL', e);
+    cloudSyncStatus = 'offline';
   }
   return false;
 }
 
 // User Password Management (Online Synced across devices)
 export function getUserPasswords(): Record<string, string> {
+  if (memoryStore[STORAGE_KEYS.PASSWORDS]) {
+    return memoryStore[STORAGE_KEYS.PASSWORDS];
+  }
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.PASSWORDS);
-    return saved ? JSON.parse(saved) : {};
+    const parsed = saved ? JSON.parse(saved) : {};
+    memoryStore[STORAGE_KEYS.PASSWORDS] = parsed;
+    return parsed;
   } catch {
     return {};
   }
@@ -106,11 +177,18 @@ export function saveUserPassword(userId: string, newPass: string): void {
   try {
     const passwords = getUserPasswords();
     passwords[userId] = newPass;
-    localStorage.setItem(STORAGE_KEYS.PASSWORDS, JSON.stringify(passwords));
-    syncToCloud(STORAGE_KEYS.PASSWORDS, passwords);
+    saveToMemoryAndCloud(STORAGE_KEYS.PASSWORDS, passwords);
   } catch (e) {
     console.error('Failed to save user password', e);
   }
+}
+
+function saveToMemoryAndCloud(key: string, data: any): void {
+  memoryStore[key] = data;
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch {}
+  syncToCloud(key, data);
 }
 
 export interface FullBackupData {
@@ -145,9 +223,14 @@ export function saveTheme(theme: ThemeMode): void {
 }
 
 export function loadPaymentMethods(): PaymentMethodConfig[] {
+  if (memoryStore[STORAGE_KEYS.PAYMENT_METHODS]) {
+    return memoryStore[STORAGE_KEYS.PAYMENT_METHODS];
+  }
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.PAYMENT_METHODS);
-    return saved ? JSON.parse(saved) : INITIAL_PAYMENT_METHODS;
+    const parsed = saved ? JSON.parse(saved) : INITIAL_PAYMENT_METHODS;
+    memoryStore[STORAGE_KEYS.PAYMENT_METHODS] = parsed;
+    return parsed;
   } catch (e) {
     console.error('Failed to load payment methods', e);
     return INITIAL_PAYMENT_METHODS;
@@ -156,25 +239,28 @@ export function loadPaymentMethods(): PaymentMethodConfig[] {
 
 export function savePaymentMethods(methods: PaymentMethodConfig[]): void {
   try {
-    localStorage.setItem(STORAGE_KEYS.PAYMENT_METHODS, JSON.stringify(methods));
-    syncToCloud(STORAGE_KEYS.PAYMENT_METHODS, methods);
+    saveToMemoryAndCloud(STORAGE_KEYS.PAYMENT_METHODS, methods);
   } catch (e) {
     console.error('Failed to save payment methods', e);
   }
 }
 
 export function loadTransactions(): Transaction[] {
+  if (memoryStore[STORAGE_KEYS.TRANSACTIONS] && Array.isArray(memoryStore[STORAGE_KEYS.TRANSACTIONS])) {
+    return memoryStore[STORAGE_KEYS.TRANSACTIONS];
+  }
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS);
     if (!saved) {
-      localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(INITIAL_TRANSACTIONS));
+      memoryStore[STORAGE_KEYS.TRANSACTIONS] = INITIAL_TRANSACTIONS;
       return INITIAL_TRANSACTIONS;
     }
     const loaded: Transaction[] = JSON.parse(saved);
     if (!Array.isArray(loaded)) {
-      localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(INITIAL_TRANSACTIONS));
+      memoryStore[STORAGE_KEYS.TRANSACTIONS] = INITIAL_TRANSACTIONS;
       return INITIAL_TRANSACTIONS;
     }
+    memoryStore[STORAGE_KEYS.TRANSACTIONS] = loaded;
     return loaded;
   } catch (e) {
     console.error('Failed to load transactions', e);
@@ -184,17 +270,21 @@ export function loadTransactions(): Transaction[] {
 
 export function saveTransactions(transactions: Transaction[]): void {
   try {
-    localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
-    syncToCloud(STORAGE_KEYS.TRANSACTIONS, transactions);
+    saveToMemoryAndCloud(STORAGE_KEYS.TRANSACTIONS, transactions);
   } catch (e) {
     console.error('Failed to save transactions', e);
   }
 }
 
 export function loadCustomers(): Customer[] {
+  if (memoryStore[STORAGE_KEYS.CUSTOMERS]) {
+    return memoryStore[STORAGE_KEYS.CUSTOMERS];
+  }
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.CUSTOMERS);
-    return saved ? JSON.parse(saved) : INITIAL_CUSTOMERS;
+    const parsed = saved ? JSON.parse(saved) : INITIAL_CUSTOMERS;
+    memoryStore[STORAGE_KEYS.CUSTOMERS] = parsed;
+    return parsed;
   } catch (e) {
     console.error('Failed to load customers', e);
     return INITIAL_CUSTOMERS;
@@ -203,13 +293,11 @@ export function loadCustomers(): Customer[] {
 
 export function saveCustomers(customers: Customer[]): void {
   try {
-    localStorage.setItem(STORAGE_KEYS.CUSTOMERS, JSON.stringify(customers));
-    syncToCloud(STORAGE_KEYS.CUSTOMERS, customers);
+    saveToMemoryAndCloud(STORAGE_KEYS.CUSTOMERS, customers);
   } catch (e) {
     console.error('Failed to save customers', e);
   }
 }
-
 
 export function capitalizeWords(str: string): string {
   if (!str) return str;
@@ -226,15 +314,20 @@ export function capitalizeWords(str: string): string {
 }
 
 export function loadCategories(): Category[] {
+  if (memoryStore[STORAGE_KEYS.CATEGORIES]) {
+    return memoryStore[STORAGE_KEYS.CATEGORIES];
+  }
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
     const cats: Category[] = saved ? JSON.parse(saved) : INITIAL_CATEGORIES;
-    return cats.map(c => ({
+    const formatted = cats.map(c => ({
       ...c,
       name: capitalizeWords(c.name)
     }));
+    memoryStore[STORAGE_KEYS.CATEGORIES] = formatted;
+    return formatted;
   } catch (e) {
-    console.error('Failed to load categories from localStorage', e);
+    console.error('Failed to load categories', e);
     return INITIAL_CATEGORIES;
   }
 }
@@ -245,23 +338,27 @@ export function saveCategories(categories: Category[]): void {
       ...c,
       name: capitalizeWords(c.name)
     }));
-    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(formatted));
-    syncToCloud(STORAGE_KEYS.CATEGORIES, formatted);
+    saveToMemoryAndCloud(STORAGE_KEYS.CATEGORIES, formatted);
   } catch (e) {
     console.error('Failed to save categories', e);
   }
 }
 
 export function loadServices(): Service[] {
+  if (memoryStore[STORAGE_KEYS.SERVICES]) {
+    return memoryStore[STORAGE_KEYS.SERVICES];
+  }
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.SERVICES);
     const rawServices: Service[] = saved ? JSON.parse(saved) : INITIAL_SERVICES;
-    return rawServices.map(srv => ({
+    const formatted = rawServices.map(srv => ({
       ...srv,
       name: capitalizeWords(srv.name)
     }));
+    memoryStore[STORAGE_KEYS.SERVICES] = formatted;
+    return formatted;
   } catch (e) {
-    console.error('Failed to load services from localStorage', e);
+    console.error('Failed to load services', e);
     return INITIAL_SERVICES.map(srv => ({
       ...srv,
       name: capitalizeWords(srv.name)
@@ -275,8 +372,7 @@ export function saveServices(services: Service[]): void {
       ...srv,
       name: capitalizeWords(srv.name)
     }));
-    localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(formatted));
-    syncToCloud(STORAGE_KEYS.SERVICES, formatted);
+    saveToMemoryAndCloud(STORAGE_KEYS.SERVICES, formatted);
   } catch (e) {
     console.error('Failed to save services', e);
   }
@@ -320,6 +416,9 @@ export function deduplicateStaff(staffList: Staff[]): Staff[] {
 }
 
 export function loadStaff(): Staff[] {
+  if (memoryStore[STORAGE_KEYS.STAFF]) {
+    return memoryStore[STORAGE_KEYS.STAFF];
+  }
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.STAFF);
     const loaded: Staff[] = saved ? JSON.parse(saved) : INITIAL_STAFF;
@@ -328,10 +427,10 @@ export function loadStaff(): Staff[] {
     const combined = [...loaded, ...INITIAL_STAFF];
     const deduplicated = deduplicateStaff(combined);
     
-    localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(deduplicated));
+    memoryStore[STORAGE_KEYS.STAFF] = deduplicated;
     return deduplicated;
   } catch (e) {
-    console.error('Failed to load staff from localStorage', e);
+    console.error('Failed to load staff', e);
     return deduplicateStaff(INITIAL_STAFF);
   }
 }
@@ -339,57 +438,69 @@ export function loadStaff(): Staff[] {
 export function saveStaff(staff: Staff[]): void {
   try {
     const deduplicated = deduplicateStaff(staff);
-    localStorage.setItem(STORAGE_KEYS.STAFF, JSON.stringify(deduplicated));
-    syncToCloud(STORAGE_KEYS.STAFF, deduplicated);
+    saveToMemoryAndCloud(STORAGE_KEYS.STAFF, deduplicated);
   } catch (e) {
     console.error('Failed to save staff', e);
   }
 }
 
 export function loadCompanyDetails(): CompanyDetails {
+  if (memoryStore[STORAGE_KEYS.COMPANY]) {
+    return memoryStore[STORAGE_KEYS.COMPANY];
+  }
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.COMPANY);
-    return saved ? JSON.parse(saved) : INITIAL_COMPANY_DETAILS;
+    const parsed = saved ? JSON.parse(saved) : INITIAL_COMPANY_DETAILS;
+    memoryStore[STORAGE_KEYS.COMPANY] = parsed;
+    return parsed;
   } catch (e) {
-    console.error('Failed to load company details from localStorage', e);
+    console.error('Failed to load company details', e);
     return INITIAL_COMPANY_DETAILS;
   }
 }
 
 export function saveCompanyDetails(company: CompanyDetails): void {
   try {
-    localStorage.setItem(STORAGE_KEYS.COMPANY, JSON.stringify(company));
-    syncToCloud(STORAGE_KEYS.COMPANY, company);
+    saveToMemoryAndCloud(STORAGE_KEYS.COMPANY, company);
   } catch (e) {
     console.error('Failed to save company details', e);
   }
 }
 
 export function loadReceiptSettings(): ReceiptSettings {
+  if (memoryStore[STORAGE_KEYS.RECEIPT]) {
+    return memoryStore[STORAGE_KEYS.RECEIPT];
+  }
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.RECEIPT);
-    return saved ? JSON.parse(saved) : INITIAL_RECEIPT_SETTINGS;
+    const parsed = saved ? JSON.parse(saved) : INITIAL_RECEIPT_SETTINGS;
+    memoryStore[STORAGE_KEYS.RECEIPT] = parsed;
+    return parsed;
   } catch (e) {
-    console.error('Failed to load receipt settings from localStorage', e);
+    console.error('Failed to load receipt settings', e);
     return INITIAL_RECEIPT_SETTINGS;
   }
 }
 
 export function saveReceiptSettings(receipt: ReceiptSettings): void {
   try {
-    localStorage.setItem(STORAGE_KEYS.RECEIPT, JSON.stringify(receipt));
-    syncToCloud(STORAGE_KEYS.RECEIPT, receipt);
+    saveToMemoryAndCloud(STORAGE_KEYS.RECEIPT, receipt);
   } catch (e) {
     console.error('Failed to save receipt settings', e);
   }
 }
 
 export function loadActivityLogs(): ActivityLog[] {
+  if (memoryStore[STORAGE_KEYS.LOGS]) {
+    return memoryStore[STORAGE_KEYS.LOGS];
+  }
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.LOGS);
-    return saved ? JSON.parse(saved) : INITIAL_ACTIVITY_LOGS;
+    const parsed = saved ? JSON.parse(saved) : INITIAL_ACTIVITY_LOGS;
+    memoryStore[STORAGE_KEYS.LOGS] = parsed;
+    return parsed;
   } catch (e) {
-    console.error('Failed to load activity logs from localStorage', e);
+    console.error('Failed to load activity logs', e);
     return INITIAL_ACTIVITY_LOGS;
   }
 }
@@ -397,8 +508,7 @@ export function loadActivityLogs(): ActivityLog[] {
 export function saveActivityLogs(logs: ActivityLog[]): void {
   try {
     const sliced = logs.slice(0, 50);
-    localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(sliced));
-    syncToCloud(STORAGE_KEYS.LOGS, sliced);
+    saveToMemoryAndCloud(STORAGE_KEYS.LOGS, sliced);
   } catch (e) {
     console.error('Failed to save activity logs', e);
   }

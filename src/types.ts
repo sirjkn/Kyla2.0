@@ -135,5 +135,6 @@ export type SettingsSubTab =
   | 'payment' 
   | 'backup'
   | 'import'
-  | 'password';
+  | 'password'
+  | 'realtime';
 
