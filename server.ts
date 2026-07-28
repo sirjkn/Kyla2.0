@@ -16,8 +16,45 @@ async function startServer() {
     res.json({ status: 'ok', database: 'Cloud SQL (PostgreSQL)' });
   });
 
+  let sseClients: express.Response[] = [];
+
+  function broadcastSyncEvent(key?: string) {
+    const data = JSON.stringify({ type: 'sync', key: key || 'all', timestamp: Date.now() });
+    sseClients.forEach((client) => {
+      try {
+        client.write(`data: ${data}\n\n`);
+      } catch {}
+    });
+  }
+
+  // SSE Realtime Push Event Stream (Instant delivery across mobile and desktop devices)
+  app.get('/api/store/events', (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders();
+
+    sseClients.push(res);
+    res.write(`data: ${JSON.stringify({ type: 'connected', timestamp: Date.now() })}\n\n`);
+
+    const keepAlive = setInterval(() => {
+      try {
+        res.write(': keepalive\n\n');
+      } catch {
+        clearInterval(keepAlive);
+      }
+    }, 15000);
+
+    req.on('close', () => {
+      clearInterval(keepAlive);
+      sseClients = sseClients.filter((c) => c !== res);
+    });
+  });
+
   // Get all store data (online sync)
   app.get('/api/store/all', async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     try {
       const rows = await withDbRetry((db) => db.select().from(appStore));
       const result: Record<string, any> = {};
@@ -72,6 +109,7 @@ async function startServer() {
       );
 
       res.json({ success: true, key });
+      broadcastSyncEvent(key);
     } catch (error: any) {
       console.error('Error saving to appStore:', error);
       res.status(500).json({ error: 'Failed to save to store', details: error.message });
@@ -108,6 +146,7 @@ async function startServer() {
       });
 
       res.json({ success: true, count: items.length });
+      broadcastSyncEvent('bulk');
     } catch (error: any) {
       console.error('Error bulk saving to appStore:', error);
       res.status(500).json({ error: 'Failed to bulk save to store', details: error.message });

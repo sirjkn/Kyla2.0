@@ -66,94 +66,112 @@ export async function syncToCloud(key: string, data: any): Promise<void> {
   }
   notifyAppSync();
 
-  try {
-    cloudSyncStatus = 'syncing';
-    const res = await fetch('/api/store/set', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, data }),
-    });
-    if (res.ok) {
-      cloudSyncStatus = 'online';
-      lastSyncTimestamp = new Date().toISOString();
-    } else {
-      cloudSyncStatus = 'offline';
-    }
-  } catch (e) {
-    console.error(`Failed to sync key ${key} to Cloud SQL`, e);
-    cloudSyncStatus = 'offline';
-  }
-}
-
-// Fetch all online state from Cloud SQL database
-export async function loadAllFromCloud(): Promise<boolean> {
-  try {
-    cloudSyncStatus = 'syncing';
-    const res = await fetch('/api/store/all');
-    if (!res.ok) {
-      cloudSyncStatus = 'offline';
-      return false;
-    }
-    const json = await res.json();
-    if (json.success && json.data) {
-      const keys = Object.keys(json.data);
-      if (keys.length === 0) {
-        // Seed initial data to cloud if database is empty
-        const initialItems = [
-          { key: STORAGE_KEYS.CATEGORIES, data: INITIAL_CATEGORIES },
-          { key: STORAGE_KEYS.SERVICES, data: INITIAL_SERVICES },
-          { key: STORAGE_KEYS.STAFF, data: INITIAL_STAFF },
-          { key: STORAGE_KEYS.COMPANY, data: INITIAL_COMPANY_DETAILS },
-          { key: STORAGE_KEYS.RECEIPT, data: INITIAL_RECEIPT_SETTINGS },
-          { key: STORAGE_KEYS.LOGS, data: INITIAL_ACTIVITY_LOGS },
-          { key: STORAGE_KEYS.PAYMENT_METHODS, data: INITIAL_PAYMENT_METHODS },
-          { key: STORAGE_KEYS.TRANSACTIONS, data: INITIAL_TRANSACTIONS },
-          { key: STORAGE_KEYS.CUSTOMERS, data: INITIAL_CUSTOMERS },
-          { key: STORAGE_KEYS.PASSWORDS, data: {} },
-        ];
-        
-        initialItems.forEach(item => {
-          memoryStore[item.key] = item.data;
-          try { localStorage.setItem(item.key, JSON.stringify(item.data)); } catch {}
-        });
-
-        await fetch('/api/store/bulk-set', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items: initialItems }),
-        });
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      cloudSyncStatus = 'syncing';
+      const res = await fetch('/api/store/set', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, data }),
+      });
+      if (res.ok) {
         cloudSyncStatus = 'online';
         lastSyncTimestamp = new Date().toISOString();
-        notifyAppSync();
-        return true;
+        return;
       }
+    } catch (e) {
+      if (attempt < 3) {
+        await new Promise(r => setTimeout(r, 400 * attempt));
+      }
+    }
+  }
+  cloudSyncStatus = 'offline';
+}
 
-      let hasChanges = false;
-      Object.entries(json.data).forEach(([key, val]) => {
-        if (val !== undefined && val !== null) {
-          const parsed = typeof val === 'string' ? JSON.parse(val) : val;
-          const currentStr = JSON.stringify(memoryStore[key]);
-          const newStr = JSON.stringify(parsed);
-          if (currentStr !== newStr) {
-            hasChanges = true;
-          }
-          memoryStore[key] = parsed;
-          try {
-            localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
-          } catch {}
+// Fetch all online state from Cloud SQL database with retry resilience
+export async function loadAllFromCloud(): Promise<boolean> {
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      cloudSyncStatus = 'syncing';
+      const res = await fetch(`/api/store/all?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
         }
       });
-
-      cloudSyncStatus = 'online';
-      lastSyncTimestamp = new Date().toISOString();
-      if (hasChanges) {
-        notifyAppSync();
+      if (!res.ok) {
+        if (attempt < 3) {
+          await new Promise(r => setTimeout(r, 300 * attempt));
+          continue;
+        }
+        cloudSyncStatus = 'offline';
+        return false;
       }
-      return hasChanges;
+      const json = await res.json();
+      if (json.success && json.data) {
+        const keys = Object.keys(json.data);
+        if (keys.length === 0) {
+          // Seed initial data to cloud if database is empty
+          const initialItems = [
+            { key: STORAGE_KEYS.CATEGORIES, data: INITIAL_CATEGORIES },
+            { key: STORAGE_KEYS.SERVICES, data: INITIAL_SERVICES },
+            { key: STORAGE_KEYS.STAFF, data: INITIAL_STAFF },
+            { key: STORAGE_KEYS.COMPANY, data: INITIAL_COMPANY_DETAILS },
+            { key: STORAGE_KEYS.RECEIPT, data: INITIAL_RECEIPT_SETTINGS },
+            { key: STORAGE_KEYS.LOGS, data: INITIAL_ACTIVITY_LOGS },
+            { key: STORAGE_KEYS.PAYMENT_METHODS, data: INITIAL_PAYMENT_METHODS },
+            { key: STORAGE_KEYS.TRANSACTIONS, data: INITIAL_TRANSACTIONS },
+            { key: STORAGE_KEYS.CUSTOMERS, data: INITIAL_CUSTOMERS },
+            { key: STORAGE_KEYS.PASSWORDS, data: {} },
+          ];
+          
+          initialItems.forEach(item => {
+            memoryStore[item.key] = item.data;
+            try { localStorage.setItem(item.key, JSON.stringify(item.data)); } catch {}
+          });
+
+          await fetch('/api/store/bulk-set', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: initialItems }),
+          });
+          cloudSyncStatus = 'online';
+          lastSyncTimestamp = new Date().toISOString();
+          notifyAppSync();
+          return true;
+        }
+
+        let hasChanges = false;
+        Object.entries(json.data).forEach(([key, val]) => {
+          if (val !== undefined && val !== null) {
+            const parsed = typeof val === 'string' ? JSON.parse(val) : val;
+            const currentStr = JSON.stringify(memoryStore[key]);
+            const newStr = JSON.stringify(parsed);
+            if (currentStr !== newStr) {
+              hasChanges = true;
+            }
+            memoryStore[key] = parsed;
+            try {
+              localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+            } catch {}
+          }
+        });
+
+        cloudSyncStatus = 'online';
+        lastSyncTimestamp = new Date().toISOString();
+        if (hasChanges) {
+          notifyAppSync();
+        }
+        return hasChanges;
+      }
+    } catch (e) {
+      if (attempt < 3) {
+        await new Promise(r => setTimeout(r, 400 * attempt));
+        continue;
+      }
+      cloudSyncStatus = 'offline';
     }
-  } catch (e) {
-    console.error('Failed to sync from Cloud SQL', e);
-    cloudSyncStatus = 'offline';
   }
   return false;
 }

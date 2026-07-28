@@ -1646,8 +1646,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
 
               {/* Architecture Highlight Box */}
               <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-xs text-slate-200 leading-relaxed">
-                <strong className="text-emerald-300 font-bold block mb-1">⚡ Zero Local Storage Dependence:</strong>
-                All POS transaction sales, service updates, staff roster edits, customer records, and system settings bypass browser-local storage and persist directly to the PostgreSQL Cloud database. Any change made on this device is broadcast in real-time across all active terminals and staff devices within 1.5 seconds.
+                <strong className="text-emerald-300 font-bold block mb-1">⚡ Zero Local Storage Dependence & Instant Mobile SSE Push:</strong>
+                All POS transaction sales, service updates, staff roster edits, customer records, and system settings bypass browser-local storage and persist directly to the PostgreSQL Cloud database. Changes are instantly broadcast in real-time across all mobile browsers (iOS Safari & Android Chrome) and desktop terminals via Server-Sent Events (SSE) and visibility wake streams.
               </div>
             </div>
           </div>

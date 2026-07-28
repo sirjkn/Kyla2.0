@@ -104,35 +104,71 @@ export default function App() {
   useEffect(() => {
     refreshAppState();
 
-    // Sync online database from Cloud SQL
-    loadAllFromCloud().then((synced) => {
-      if (synced) {
-        refreshAppState();
+    const triggerSync = () => {
+      loadAllFromCloud().then((synced) => {
+        if (synced) {
+          refreshAppState();
+        }
+      });
+    };
+
+    // Initial sync
+    triggerSync();
+
+    // 1. SSE Stream Connection for Instant Real-Time Push Across Mobile & Desktop Devices
+    let eventSource: EventSource | null = null;
+    let sseReconnectTimer: any = null;
+
+    const connectSse = () => {
+      if (typeof window === 'undefined' || !('EventSource' in window)) return;
+      if (eventSource) {
+        try { eventSource.close(); } catch {}
       }
-    });
+      try {
+        eventSource = new EventSource('/api/store/events');
+        eventSource.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+            if (data && (data.type === 'sync' || data.type === 'connected')) {
+              triggerSync();
+            }
+          } catch {}
+        };
+        eventSource.onerror = () => {
+          if (eventSource) {
+            try { eventSource.close(); } catch {}
+            eventSource = null;
+          }
+          clearTimeout(sseReconnectTimer);
+          sseReconnectTimer = setTimeout(connectSse, 3000);
+        };
+      } catch {}
+    };
 
-    // Fast Periodic Background Sync with Cloud SQL (every 1.5 seconds for real-time sales across devices)
-    const interval = setInterval(() => {
-      loadAllFromCloud().then((synced) => {
-        if (synced) {
-          refreshAppState();
-        }
-      });
-    }, 1500);
+    connectSse();
 
-    const handleFocus = () => {
-      loadAllFromCloud().then((synced) => {
-        if (synced) {
-          refreshAppState();
+    // 2. Fast Background Polling Fallback (1.2 seconds for mobile & desktop)
+    const interval = setInterval(triggerSync, 1200);
+
+    // 3. Mobile Browser & Tab Visibility Event Handlers (iOS Safari / Android Chrome compatibility)
+    const handleVisibilityOrWake = () => {
+      if (document.visibilityState === 'visible') {
+        triggerSync();
+        if (!eventSource || eventSource.readyState === EventSource.CLOSED) {
+          connectSse();
         }
-      });
+      }
     };
 
     const handleStorage = () => {
       refreshAppState();
     };
 
-    window.addEventListener('focus', handleFocus);
+    window.addEventListener('focus', handleVisibilityOrWake);
+    document.addEventListener('visibilitychange', handleVisibilityOrWake);
+    window.addEventListener('pageshow', handleVisibilityOrWake);
+    window.addEventListener('online', handleVisibilityOrWake);
+    window.addEventListener('touchstart', handleVisibilityOrWake, { passive: true });
     window.addEventListener('storage', handleStorage);
     window.addEventListener('spaflow-sync', handleStorage);
 
@@ -143,7 +179,15 @@ export default function App() {
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener('focus', handleFocus);
+      clearTimeout(sseReconnectTimer);
+      if (eventSource) {
+        try { eventSource.close(); } catch {}
+      }
+      window.removeEventListener('focus', handleVisibilityOrWake);
+      document.removeEventListener('visibilitychange', handleVisibilityOrWake);
+      window.removeEventListener('pageshow', handleVisibilityOrWake);
+      window.removeEventListener('online', handleVisibilityOrWake);
+      window.removeEventListener('touchstart', handleVisibilityOrWake);
       window.removeEventListener('storage', handleStorage);
       window.removeEventListener('spaflow-sync', handleStorage);
     };
