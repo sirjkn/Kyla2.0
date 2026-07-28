@@ -73,10 +73,28 @@ export function getApiBaseUrl(): string {
   return '';
 }
 
+export function formatApiUrl(input: string): string {
+  let cleaned = input.trim().replace(/\/+$/, '');
+  if (!cleaned) return '';
+  
+  // If it's already full http or https
+  if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) {
+    return cleaned;
+  }
+  
+  // If it contains a dot or localhost (e.g. domain.com or my-app.run.app)
+  if (cleaned.includes('.') || cleaned.startsWith('localhost')) {
+    return `https://${cleaned}`;
+  }
+
+  return cleaned;
+}
+
 export function setApiBaseUrl(url: string) {
   try {
-    if (url) {
-      localStorage.setItem('spaflow_api_url', url.trim());
+    const formatted = formatApiUrl(url);
+    if (formatted) {
+      localStorage.setItem('spaflow_api_url', formatted);
     } else {
       localStorage.removeItem('spaflow_api_url');
     }
