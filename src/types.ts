@@ -39,6 +39,7 @@ export interface Staff {
   status: 'active' | 'inactive';
   avatarColor: string;
   createdAt: string;
+  isAdmin?: boolean;
 }
 
 export interface CompanyDetails {

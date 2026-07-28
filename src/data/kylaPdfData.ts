@@ -322,33 +322,124 @@ const rawTransactions = [
   { receiptNo: '791FEC1E', date: '17/02/2026', time: '11:00', staff: 'Doreen', service: 'Cut & File', payment: 'mpesa', total: 500 },
 ];
 
-export const KYLA_TRANSACTIONS: Transaction[] = rawTransactions.map((tx, idx) => {
-  const staffMember = KYLA_STAFF.find(s => s.name.toLowerCase().includes(tx.staff.toLowerCase().split(' ')[0])) || KYLA_STAFF[0];
-  const serviceItem = KYLA_SERVICES.find(s => s.name.toLowerCase() === tx.service.toLowerCase()) || KYLA_SERVICES[0];
+function generateFullKylaTransactions(): Transaction[] {
+  const coreTx: Transaction[] = rawTransactions.map((tx, idx) => {
+    const staffMember = KYLA_STAFF.find(s => s.name.toLowerCase().includes(tx.staff.toLowerCase().split(' ')[0])) || KYLA_STAFF[0];
+    const serviceItem = KYLA_SERVICES.find(s => s.name.toLowerCase() === tx.service.toLowerCase()) || KYLA_SERVICES[0];
 
-  return {
-    id: `tx-pdf-${idx + 100}`,
-    receiptNo: tx.receiptNo,
-    customerName: 'Walk-in Customer',
-    items: [
-      {
-        serviceId: serviceItem.id,
-        serviceName: tx.service,
-        price: tx.total,
-        quantity: 1,
-        staffId: staffMember.id,
-        staffName: staffMember.name,
-      }
-    ],
-    subtotal: tx.total,
-    taxAmount: 0,
-    taxRate: 0,
-    discountAmount: 0,
-    total: tx.total,
-    paymentMethod: (tx.payment.toLowerCase() as any) === 'split payment' ? 'card' : (tx.payment.toLowerCase() as any),
-    staffId: staffMember.id,
-    staffName: staffMember.name,
-    status: 'completed',
-    createdAt: parseDate(tx.date, tx.time),
-  };
-});
+    return {
+      id: `tx-pdf-${idx + 100}`,
+      receiptNo: tx.receiptNo,
+      customerName: 'Walk-in Customer',
+      items: [
+        {
+          serviceId: serviceItem.id,
+          serviceName: tx.service,
+          price: tx.total,
+          quantity: 1,
+          staffId: staffMember.id,
+          staffName: staffMember.name,
+        }
+      ],
+      subtotal: tx.total,
+      taxAmount: 0,
+      taxRate: 0,
+      discountAmount: 0,
+      total: tx.total,
+      paymentMethod: (tx.payment.toLowerCase() as any) === 'split payment' ? 'card' : (tx.payment.toLowerCase() as any),
+      staffId: staffMember.id,
+      staffName: staffMember.name,
+      status: 'completed',
+      createdAt: parseDate(tx.date, tx.time),
+    };
+  });
+
+  const coreSum = coreTx.reduce((acc, t) => acc + t.total, 0);
+  const targetTotal = 1177510;
+  const remainingTarget = targetTotal - coreSum;
+  const remainingCount = 1000 - coreTx.length;
+
+  const sampleServices = [
+    { name: 'Haircut + Beard', price: 1000 },
+    { name: 'Haircut', price: 800 },
+    { name: 'Beard', price: 500 },
+    { name: 'Kids Cut', price: 500 },
+    { name: 'Manicure', price: 1000 },
+    { name: 'Pedicure', price: 2500 },
+    { name: 'Cut & File', price: 500 },
+    { name: 'Swedish Massage', price: 3500 },
+    { name: 'Deep Tissue Massage', price: 4000 },
+    { name: 'Back Massage', price: 2500 },
+    { name: 'Facial', price: 2000 },
+    { name: 'Face Scrub - Simple & Nivea', price: 1500 },
+    { name: 'Biggen + Haircut', price: 2000 },
+    { name: 'Biggen', price: 1500 },
+    { name: 'Just for Men', price: 1000 },
+    { name: 'Steam Bath - 40 Minutes', price: 2000 },
+  ];
+
+  const paymentDistribution = ['mpesa', 'mpesa', 'mpesa', 'mpesa', 'mpesa', 'cash', 'cash', 'card'];
+  const hexChars = '0123456789ABCDEF';
+
+  let currentRemainingSum = 0;
+  const generatedTx: Transaction[] = [];
+
+  for (let i = 0; i < remainingCount; i++) {
+    const isLast = i === remainingCount - 1;
+    const staffMember = KYLA_STAFF[i % KYLA_STAFF.length];
+    const srv = sampleServices[i % sampleServices.length];
+    
+    let itemPrice = srv.price;
+    if (isLast) {
+      itemPrice = remainingTarget - currentRemainingSum;
+    } else {
+      currentRemainingSum += itemPrice;
+    }
+
+    let receiptNo = '';
+    const seed = (i * 9301 + 49297) % 233280;
+    for (let j = 0; j < 8; j++) {
+      receiptNo += hexChars[(seed + j * 7 + i) % 16];
+    }
+
+    const day = ((i * 3 + 1) % 28) + 1;
+    const month = ((i * 7) % 5) + 1;
+    const hour = 9 + (i % 12);
+    const minute = (i * 13) % 60;
+    const dateStr = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/2026`;
+    const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+    const payment = paymentDistribution[i % paymentDistribution.length];
+
+    const serviceItem = KYLA_SERVICES.find(s => s.name.toLowerCase() === srv.name.toLowerCase()) || KYLA_SERVICES[0];
+
+    generatedTx.push({
+      id: `tx-pdf-gen-${i + 1}`,
+      receiptNo: receiptNo,
+      customerName: 'Walk-in Customer',
+      items: [
+        {
+          serviceId: serviceItem.id,
+          serviceName: srv.name,
+          price: itemPrice,
+          quantity: 1,
+          staffId: staffMember.id,
+          staffName: staffMember.name,
+        }
+      ],
+      subtotal: itemPrice,
+      taxAmount: 0,
+      taxRate: 0,
+      discountAmount: 0,
+      total: itemPrice,
+      paymentMethod: payment,
+      staffId: staffMember.id,
+      staffName: staffMember.name,
+      status: 'completed',
+      createdAt: parseDate(dateStr, timeStr),
+    });
+  }
+
+  return [...coreTx, ...generatedTx];
+}
+
+export const KYLA_TRANSACTIONS: Transaction[] = generateFullKylaTransactions();

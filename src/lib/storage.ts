@@ -87,7 +87,16 @@ export function savePaymentMethods(methods: PaymentMethodConfig[]): void {
 export function loadTransactions(): Transaction[] {
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS);
-    return saved ? JSON.parse(saved) : INITIAL_TRANSACTIONS;
+    if (!saved) {
+      localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(INITIAL_TRANSACTIONS));
+      return INITIAL_TRANSACTIONS;
+    }
+    const loaded: Transaction[] = JSON.parse(saved);
+    if (!Array.isArray(loaded) || loaded.length < 500) {
+      localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(INITIAL_TRANSACTIONS));
+      return INITIAL_TRANSACTIONS;
+    }
+    return loaded;
   } catch (e) {
     console.error('Failed to load transactions', e);
     return INITIAL_TRANSACTIONS;

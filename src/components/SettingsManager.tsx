@@ -38,7 +38,8 @@ import {
   FileText,
   Smartphone,
   KeyRound,
-  Lock
+  Lock,
+  ShieldCheck
 } from 'lucide-react';
 
 interface SettingsManagerProps {
@@ -119,6 +120,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
     email: string;
     specializations: string[];
     status: 'active' | 'inactive';
+    isAdmin: boolean;
   }>({
     name: '',
     role: 'Therapist',
@@ -126,6 +128,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
     email: '',
     specializations: [],
     status: 'active',
+    isAdmin: false,
   });
   const [deletingStaffId, setDeletingStaffId] = useState<string | null>(null);
 
@@ -164,6 +167,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
         email: member.email,
         specializations: member.specializations,
         status: member.status,
+        isAdmin: Boolean(member.isAdmin || member.role.toLowerCase().includes('admin')),
       });
     } else {
       setEditingStaffMember(null);
@@ -174,6 +178,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
         email: '',
         specializations: [],
         status: 'active',
+        isAdmin: false,
       });
     }
     setIsStaffModalOpen(true);
@@ -184,14 +189,20 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
     e.preventDefault();
     if (!staffForm.name.trim()) return;
 
+    const formattedRole = staffForm.isAdmin && !staffForm.role.toLowerCase().includes('admin')
+      ? `${staffForm.role} (Admin)`
+      : staffForm.role;
+
     if (editingStaffMember) {
       onEditStaff({
         ...editingStaffMember,
         ...staffForm,
+        role: formattedRole,
       });
     } else {
       onAddStaff({
         ...staffForm,
+        role: formattedRole,
         avatarColor: 'bg-blue-500',
       });
     }
@@ -766,13 +777,21 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                       </div>
                     </div>
 
-                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0 ${
-                      member.status === 'active' 
-                        ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/50' 
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
-                    }`}>
-                      {member.status === 'active' ? 'Active' : 'Inactive'}
-                    </span>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {(member.isAdmin || member.role.toLowerCase().includes('admin')) && (
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-300/60 dark:border-purple-800/60 flex items-center gap-0.5">
+                          <ShieldCheck className="w-2.5 h-2.5 text-purple-600" />
+                          <span>Admin</span>
+                        </span>
+                      )}
+                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                        member.status === 'active' 
+                          ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/50' 
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                      }`}>
+                        {member.status === 'active' ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="space-y-0.5 text-[10px] text-slate-500 dark:text-slate-400 pt-1.5 border-t border-slate-100 dark:border-slate-800 font-medium">
@@ -810,21 +829,46 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                   </div>
                 </div>
 
-                <div className="pt-2 mt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <button
-                    onClick={() => {
-                      setAdminResetTarget({ id: member.id, name: member.name, role: member.role || 'Staff' });
-                      setAdminResetNewPass('');
-                      setAdminResetMsg('');
-                      setAdminResetErr('');
-                    }}
-                    className="px-2 py-1 rounded-lg text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-950/80 transition-colors flex items-center gap-1 text-[10px] font-extrabold bg-amber-500/10 border border-amber-300/50 dark:border-amber-700/50"
-                    title="Change Staff Password"
-                    id={`change-staff-pass-${member.id}`}
-                  >
-                    <KeyRound className="w-3 h-3 text-amber-500" />
-                    <span>Password</span>
-                  </button>
+                <div className="pt-2 mt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-1">
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => {
+                        setAdminResetTarget({ id: member.id, name: member.name, role: member.role || 'Staff' });
+                        setAdminResetNewPass('');
+                        setAdminResetMsg('');
+                        setAdminResetErr('');
+                      }}
+                      className="px-2 py-1 rounded-lg text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-950/80 transition-colors flex items-center gap-1 text-[10px] font-extrabold bg-amber-500/10 border border-amber-300/50 dark:border-amber-700/50"
+                      title="Change Staff Password"
+                      id={`change-staff-pass-${member.id}`}
+                    >
+                      <KeyRound className="w-3 h-3 text-amber-500" />
+                      <span>Pass</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const isCurrAdmin = Boolean(member.isAdmin || member.role.toLowerCase().includes('admin'));
+                        const nextAdmin = !isCurrAdmin;
+                        onEditStaff({
+                          ...member,
+                          isAdmin: nextAdmin,
+                          role: nextAdmin 
+                            ? (member.role.toLowerCase().includes('admin') ? member.role : `${member.role} (Admin)`)
+                            : member.role.replace(/\s*\(Admin\)/gi, '').replace(/Administrator/gi, 'Staff'),
+                        });
+                      }}
+                      className={`px-2 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-0.5 transition-all ${
+                        (member.isAdmin || member.role.toLowerCase().includes('admin'))
+                          ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-200 border border-purple-300/80 dark:border-purple-700/80'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                      }`}
+                      title={member.isAdmin ? "Remove Admin Role" : "Make Admin"}
+                    >
+                      <ShieldCheck className="w-3 h-3 text-purple-600 shrink-0" />
+                      <span>{(member.isAdmin || member.role.toLowerCase().includes('admin')) ? 'Admin ✓' : '+ Admin'}</span>
+                    </button>
+                  </div>
 
                   <div className="flex items-center space-x-1">
                     <button
@@ -1638,6 +1682,28 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                   <option value="active">Active (Available on schedule)</option>
                   <option value="inactive">Inactive (Off duty)</option>
                 </select>
+              </div>
+
+              {/* Admin Toggle */}
+              <div className="p-3 bg-purple-50/80 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800/50 rounded-xl flex items-center justify-between">
+                <div className="flex items-center space-x-2.5 min-w-0 pr-2">
+                  <ShieldCheck className="w-5 h-5 text-purple-600 shrink-0" />
+                  <div>
+                    <label htmlFor="staff-is-admin-checkbox" className="text-xs font-bold text-slate-900 dark:text-slate-100 cursor-pointer block leading-tight">
+                      System Administrator Privileges
+                    </label>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                      Grant access to full company settings, receipt layouts, user passwords, and backups.
+                    </p>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  id="staff-is-admin-checkbox"
+                  checked={staffForm.isAdmin}
+                  onChange={(e) => setStaffForm({ ...staffForm, isAdmin: e.target.checked })}
+                  className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500 cursor-pointer shrink-0"
+                />
               </div>
 
               <div className="flex items-center justify-end space-x-2 pt-4 border-t border-slate-200 dark:border-slate-800">

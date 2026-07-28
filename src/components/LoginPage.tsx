@@ -56,11 +56,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     role: 'Administrator',
   };
 
-  const staffUsers = staff.map((st) => ({
-    id: st.id,
-    name: st.name,
-    role: st.role || 'Therapist & Staff',
-  }));
+  const staffUsers = staff.map((st) => {
+    const isStAdmin = Boolean(st.isAdmin || st.role?.toLowerCase().includes('admin'));
+    return {
+      id: st.id,
+      name: st.name,
+      role: isStAdmin 
+        ? (st.role?.toLowerCase().includes('admin') ? st.role : `Administrator (${st.role})`) 
+        : (st.role || 'Therapist & Staff'),
+    };
+  });
 
   const rawUsers = [adminUser, ...staffUsers];
   const seenUserKeys = new Set<string>();
